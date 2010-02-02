@@ -37,7 +37,6 @@ EXTRA_DIST =			\
 	eeprom_init.c		\
 	eeprom_io.c		\
 	eeprom_io.h		\
-	fpga_load.c		\
 	fpga_rev2.c		\
 	fpga_rev2.h		\
 	gpif.c			\
@@ -139,7 +138,7 @@ check_udelay.ihx: $(CHECK_UDELAY_OBJS) $(LIBDEP)
 USRP_OBJS = \
 	vectors.rel 						\
 	usrp_main.rel usrp_common.rel board_specific.rel	\
-	fpga_load.rel fpga_rev2.rel init_gpif.rel usrp_gpif.rel \
+	fpga_rev2.rel init_gpif.rel usrp_gpif.rel \
 	usb_descriptors.rel spi.rel eeprom_io.rel $(STARTUP)
 
 std.ihx: $(USRP_OBJS) $(LIBDEP)

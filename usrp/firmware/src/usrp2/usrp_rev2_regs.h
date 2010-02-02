@@ -34,7 +34,7 @@
 #define USRP_PA			IOA		// Port A
 #define	USRP_PA_OE		OEA		// Port A direction register
 
-/* TODO: What are J4.15 and J4.19? */
+/* TODO: What are J4[15] and J4[19] */
 #define	bmPA_INT_PCA		bmBIT0		// I2C GPIO (U30) interrupt
 #define	bmPA_J4_15		bmBIT1		// daughterboard I/O
 #define	bmPA_SEN_FPGA		bmBIT2		// serial enable for FPGA (active low)
@@ -60,10 +60,26 @@ sbit at 0x80+6 bitS_OUT;		// out from FX2 point of view
 
 /*
  * Port B: GPIF	FD[7:0]
- * Port C: J4[20:2:6] daughterboard I/Os (unused)
- * Port D: GPIF	FD[15:8]
- * Port E: J4[49:2:35] daughterboard I/Os (unused)
  */
+
+/*
+ * Port C: J4[6:2:20] daughterboard I/Os (unused)
+ */
+#define bmPC_EEPROM_BOOT	bmBIT0		// flashes after eeprom boot
+#define bmPC_TICK		bmBIT1		// 2 Hz from timer2 interrupt
+
+#define bmPORT_C_OUTPUTS  0xFF
+#define bmPORT_C_INITIAL  0x00
+
+/*
+ * Port D: GPIF	FD[15:8]
+ */
+
+/*
+ * Port E: J4[35:2:49] daughterboard I/Os (unused)
+ */
+#define bmPORT_E_OUTPUTS  0xFF
+#define bmPORT_E_INITIAL  0x00
 
 /*
  * FPGA output lines that are tied to FX2 RDYx inputs.

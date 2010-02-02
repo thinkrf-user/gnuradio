@@ -139,39 +139,6 @@ app_vendor_cmd (void)
 
     switch (bRequest){
 
-    case VRQ_SET_LED:
-      switch (wIndexL){
-      case 0:
-	set_led_0 (wValueL);
-	break;
-	
-      case 1:
-	set_led_1 (wValueL);
-	break;
-	
-      default:
-	return 0;
-      }
-      break;
-      
-    case VRQ_FPGA_LOAD:
-      switch (wIndexL){			// sub-command
-      case FL_BEGIN:
-	return fpga_load_begin ();
-	
-      case FL_XFER:
-	get_ep0_data ();
-	return fpga_load_xfer (EP0BUF, EP0BCL);
-	
-      case FL_END:
-	return fpga_load_end ();
-	
-      default:
-	return 0;
-      }
-      break;
-      
-
     case VRQ_FPGA_SET_RESET:
       fpga_set_reset (wValueL);
       break;
@@ -232,7 +199,9 @@ main_loop (void)
 
       // OK, GPIF is idle.  Let's try to give it some work.
 
+      /*
       // First check for underruns and overruns
+
 
       if (UC_BOARD_HAS_FPGA && (USRP_PA & (bmPA_TX_UNDERRUN | bmPA_RX_OVERRUN))){
       
@@ -246,28 +215,7 @@ main_loop (void)
 	// tell the FPGA to clear the flags
 	fpga_clear_flags ();
       }
-
-      // Next see if there are any "OUT" packets waiting for our attention,
-      // and if so, if there's room in the FPGA's FIFO for them.
-
-      if (g_tx_enable && !(EP24FIFOFLGS & 0x02)){  // USB end point fifo is not empty...
-
-	if (fpga_has_room_for_packet ()){	   // ... and FPGA has room for packet
-
-	  GPIFTCB1 = 0x01;	SYNCDELAY;
-	  GPIFTCB0 = 0x00;	SYNCDELAY;
-
-	  setup_flowstate_write ();
-
-	  SYNCDELAY;
-	  GPIFTRIG = bmGPIF_EP2_START | bmGPIF_WRITE; 	// start the xfer
-	  SYNCDELAY;
-
-	  while (!(GPIFTRIG & bmGPIF_IDLE)){
-	    // wait for the transaction to complete
-	  }
-	}
-      }
+      */
 
       // See if there are any requests for "IN" packets, and if so
       // whether the FPGA's got any packets for us.
@@ -310,7 +258,7 @@ isr_tick (void) interrupt
   
   if (--count == 0){
     count = 50;
-    USRP_LED_REG ^= bmLED0;
+    IOC ^= bmPC_TICK;
   }
 
   clear_timer_irq ();
@@ -360,9 +308,6 @@ main (void)
   // if (UC_START_WITH_GSTATE_OUTPUT_ENABLED)
   IFCONFIG |= bmGSTATE;			// no conflict, start with it on
 
-  set_led_0 (0);
-  set_led_1 (0);
-  
   EA = 0;		// disable all interrupts
 
   patch_usb_descriptors();

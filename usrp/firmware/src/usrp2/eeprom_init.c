@@ -32,22 +32,8 @@
 xdata at USRP_HASH_SLOT_0_ADDR unsigned char hash0[USRP_HASH_SIZE];
 
 
-#define enable_codecs() USRP_PA &= ~(bmPA_SEN_CODEC_A | bmPA_SEN_CODEC_B)
-#define disable_all()	USRP_PA |=  (bmPA_SEN_CODEC_A | bmPA_SEN_CODEC_B)
-
 static void
 write_byte_msb (unsigned char v);
-
-void
-write_both_9862s (unsigned char header_lo, unsigned char v)
-{
-  enable_codecs ();
-
-  write_byte_msb (header_lo);
-  write_byte_msb (v);
-
-  disable_all ();
-}
 
 // ----------------------------------------------------------------
 
@@ -90,15 +76,8 @@ void eeprom_init (void)
   // USBCS &= ~bmRENUM;		// chip firmware handles commands
   USBCS = 0;			// chip firmware handles commands
 
-  USRP_PC &= ~bmPC_nRESET;	// active low reset
-  USRP_PC |=  bmPC_nRESET;
-
   // init_spi ();
   bitS_OUT = 0;			/* idle state has CLK = 0 */
-
-  write_both_9862s (REG_RX_PWR_DN,    0x01);
-  write_both_9862s (REG_TX_PWR_DN,    0x0f);	// pwr dn digital and analog_both
-  write_both_9862s (REG_TX_MODULATOR, 0x00);	// coarse & fine modulators disabled
 
   // zero firmware hash slot
   i = 0;
@@ -111,6 +90,6 @@ void eeprom_init (void)
   while (1){
     counter++;
     if (counter & 0x8000)
-      IOC ^= bmPC_LED0;
+      IOC ^= bmPC_EEPROM_BOOT;
   }
 }

@@ -67,11 +67,6 @@
 void init_usrp (void);
 void init_gpif (void);
 
-void set_led_0 (unsigned char on);
-void set_led_1 (unsigned char on);
-void toggle_led_0 (void);
-void toggle_led_1 (void);
-
 #define la_trace(v)
 
 #endif /* _USRPCOMMON_H_ */

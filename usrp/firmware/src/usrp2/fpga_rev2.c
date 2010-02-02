@@ -58,24 +58,6 @@ write_fpga_master_ctrl (void)
   fpga_write_reg (FR_MASTER_CTRL, regval);
 }
 
-// Resets both AD9862's and the FPGA serial bus interface.
-
-void
-fpga_set_reset (unsigned char on)
-{
-  on &= 0x1;
-
-  if (on){
-    USRP_PC &= ~bmPC_nRESET;		// active low
-    g_tx_enable = 0;
-    g_rx_enable = 0;
-    g_tx_reset = 0;
-    g_rx_reset = 0;
-  }
-  else
-    USRP_PC |= bmPC_nRESET;
-}
-
 void
 fpga_set_tx_enable (unsigned char on)
 {

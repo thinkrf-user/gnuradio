@@ -26,8 +26,6 @@ EXTRA_DIST = 			\
 	check_udelay.c		\
 	edit-gpif		\
 	fpga.h			\
-	fpga_load.h		\
-	fpga_load.c		\
 	gpif.c			\
 	gpif.gpf		\
 	init_gpif.c		\

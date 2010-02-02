@@ -22,8 +22,6 @@
 #ifndef INCLUDED_FPGA_H
 #define INCLUDED_FPGA_H
 
-#include "fpga_load.h"
-
 #if defined(HAVE_USRP2)
 #include "fpga_rev2.h"
 #endif
