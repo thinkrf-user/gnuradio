@@ -77,6 +77,7 @@ LINKOPTS = $(MEMOPTS) $(LIBOPTS)
 
 EXECUTABLES = 			\
 	std.ihx			\
+	std.hex			\
 	blink_leds.ihx 		\
 	check_mdelay.ihx	\
 	check_udelay.ihx	\
@@ -100,6 +101,8 @@ noinst_SCRIPTS = 		\
 		|| $(LN_S) `dirname '$<'`/../common/`basename '$<'` ../common/`basename '$<'`
 	$(XAS) `basename '$<'`
 
+.ihx.hex:
+	$(PACKIHX) $< > $@
 
 EEPROM_BOOT_OBJS = eeprom_boot.rel eeprom_init.rel $(STARTUP)
 
@@ -145,13 +148,13 @@ std.ihx: $(USRP_OBJS) $(LIBDEP)
 	$(XCC) $(LINKOPTS) -o $@ $(USRP_OBJS)
 
 CLEANFILES = 		\
-	*.ihx *.lnk *.lst *.map *.mem *.rel *.rst *.sym *.asm *.lib	\
+	*.hex *.ihx *.lnk *.lst *.map *.mem *.rel *.rst *.sym *.asm *.lib	\
 	usrp_gpif.c usrp_gpif_inline.h \
 	burn-usrp2-eeprom	\
 	burn-usrp4-eeprom
 
 DISTCLEANFILES = 	\
-	*.ihx *.lnk *.lst *.map *.mem *.rel *.rst *.sym *.asm *.lib
+	*.hex *.ihx *.lnk *.lst *.map *.mem *.rel *.rst *.sym *.asm *.lib
 
 # build gpif stuff
 

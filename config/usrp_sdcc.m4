@@ -22,8 +22,9 @@ AC_DEFUN([USRP_SDCC],
 	sdccok=yes
 	AC_CHECK_PROG(XCC, sdcc, sdcc -mmcs51 --no-xinit-opt,no)
 	AC_CHECK_PROG(XAS, asx8051, asx8051 -plosgff,no)
+	AC_CHECK_PROG(PACKIHX, packihx, packihx,no)
 
-	if test "$XCC" = "no" -o "$XAS" = "no" ; then
+	if test "$XCC" = "no" -o "$XAS" = "no" -o "$PACKIHX" = "no"; then
 		AC_MSG_RESULT([USRP requires sdcc. sdcc not found. See http://sdcc.sf.net])
 		sdccok=no
 	else
@@ -65,6 +66,7 @@ AC_DEFUN([USRP_SDCC],
 
 		AC_SUBST(XCC)
 		AC_SUBST(XAS)
+		AC_SUBST(PACKIHX)
 	fi
 
 	if test $sdccok = yes; then
