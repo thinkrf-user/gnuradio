@@ -281,23 +281,9 @@ isr_tick (void) interrupt
 void
 patch_usb_descriptors(void)
 {
-  static xdata unsigned char hw_rev;
-  static xdata unsigned char serial_no[8];
-  unsigned char i;
-
-  eeprom_read(I2C_ADDR_BOOT, HW_REV_OFFSET, &hw_rev, 1);	// LSB of device id
-  usb_desc_hw_rev_binary_patch_location_0[0] = hw_rev;
-  usb_desc_hw_rev_binary_patch_location_1[0] = hw_rev;
-  usb_desc_hw_rev_ascii_patch_location_0[0] = hw_rev + '0';     // FIXME if we get > 9
-
-  eeprom_read(I2C_ADDR_BOOT, SERIAL_NO_OFFSET, serial_no, SERIAL_NO_LEN);
-
-  for (i = 0; i < SERIAL_NO_LEN; i++){
-    unsigned char ch = serial_no[i];
-    if (ch == 0xff)	// make unprogrammed EEPROM default to '0'
-      ch = '0';
-    usb_desc_serial_number_ascii[i << 1] = ch;
-  }
+  usb_desc_hw_rev_binary_patch_location_0[0] = 5;
+  usb_desc_hw_rev_binary_patch_location_1[0] = 5;
+  usb_desc_hw_rev_ascii_patch_location_0[0] = '5';
 }
 
 void
