@@ -372,3 +372,9 @@ read_bytes_msb (xdata unsigned char *buf, unsigned char len)
   }
 }
 
+void spi_test(const unsigned char xdata buffer[8])
+{
+  setup_enables(SPI_ENABLE_FPGA);
+  write_bytes_msb(buffer, 8);
+  disable_all();
+}
