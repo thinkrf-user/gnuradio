@@ -619,7 +619,7 @@ static libusb_device_handle *
 open_nth_cmd_interface (int nth, libusb_context *ctx)
 {
 
-  libusb_device *udev = usrp_find_device (nth, false, ctx);
+  libusb_device *udev = usrp_find_device (nth, true, ctx);
   if (udev == 0){
     fprintf (stderr, "usrp: failed to find usrp[%d]\n", nth);
     return 0;
@@ -743,12 +743,23 @@ usrp_load_standard_bits (int nth, bool force,
 
   // first, figure out what hardware rev we're dealing with
   {
-    libusb_device *udev = usrp_find_device (nth, false, ctx);
+    libusb_device *udev = usrp_find_device (nth, true, ctx);
     if (udev == 0){
       fprintf (stderr, "usrp: failed to find usrp[%d]\n", nth);
       return false;
     }
     hw_rev = usrp_hw_rev (udev);
+
+    // ThinkRF WSA1000:
+    //
+    // When booting from EEPROM, looks like a generic Cypress FX2 with
+    // hw_rev = 0. We want find_file to look in $USRP_ROOT/rev5 for std.ihx.
+    //
+    // After loading the firmware, the USB descriptors make it look like a true
+    // USRP1 rev5.
+    if (usrp_fx2_p(udev) && hw_rev == 0) {
+      hw_rev = 5;
+    }
   }
 
   // start by loading the firmware
@@ -762,30 +773,6 @@ usrp_load_standard_bits (int nth, bool force,
   }
   s = usrp_load_firmware_nth (nth, filename, force, ctx);
   load_status_msg (s, "firmware", filename);
-
-  if (s == ULS_ERROR)
-    return false;
-
-  // if we actually loaded firmware, we must reload fpga ...
-  if (s == ULS_OK)
-    force = true;
-
-  // now move on to the fpga configuration bitstream
-
-  proto_filename = get_proto_filename(fpga_filename, "USRP_FPGA",
-				      default_fpga_filename);
-  filename = find_file (proto_filename, hw_rev);
-  if (filename == 0){
-    fprintf (stderr, "Can't find fpga bitstream: %s\n", proto_filename);
-    return false;
-  }
-  libusb_device_handle *udh = open_nth_cmd_interface (nth, ctx);
-  if (udh == 0)
-    return false;
-
-  s = usrp_load_fpga (udh, filename, force);
-  usrp_close_interface (udh);
-  load_status_msg (s, "fpga bitstream", filename);
 
   if (s == ULS_ERROR)
     return false;
