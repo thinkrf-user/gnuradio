@@ -85,7 +85,7 @@ sbit at 0x80+6 bitS_OUT;		// out from FX2 point of view
  * FPGA output lines that are tied to FX2 RDYx inputs.
  * These are readable using GPIFREADYSTAT.
  */
-#define	bmFPGA_HAS_SPACE		bmBIT0	// EF#
+#define	bmFPGA_RX_OVERRUN		bmBIT0	// read in software only
 #define	bmFPGA_PKT_AVAIL		bmBIT1	// FF#
 
 /*
@@ -93,8 +93,8 @@ sbit at 0x80+6 bitS_OUT;		// out from FX2 point of view
  *
  * These are controlled by the GPIF microprogram...
  */
-#define bmFPGA_REN			bmBIT0
-#define bmFPGA_OE			bmBIT1
-#define bmFPGA_U8			bmBIT2	// unused
+#define bmFPGA_CLEAR_OVERRUN		bmBIT0	// controlled by software only
+#define bmFPGA_RD			bmBIT1
+#define bmFPGA_OE			bmBIT2
 
 #endif /* _USRP_REV1_REGS_H_ */
