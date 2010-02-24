@@ -52,10 +52,8 @@
 #define	wLengthH	SETUPDAT[7]
 
 
-unsigned char g_tx_enable = 0;
 unsigned char g_rx_enable = 0;
 unsigned char g_rx_overrun = 0;
-unsigned char g_tx_underrun = 0;
 
 /*
  * the host side fpga loader code pushes an MD5 hash of the bitstream
@@ -90,13 +88,6 @@ app_vendor_cmd (void)
 
     case VRQ_GET_STATUS:
       switch (wIndexL){
-
-      case GS_TX_UNDERRUN:
-	EP0BUF[0] = g_tx_underrun;
-	g_tx_underrun = 0;
-	EP0BCH = 0;
-	EP0BCL = 1;
-	break;
 
       case GS_RX_OVERRUN:
 	EP0BUF[0] = g_rx_overrun;
@@ -139,22 +130,10 @@ app_vendor_cmd (void)
 
     switch (bRequest){
 
-    case VRQ_FPGA_SET_RESET:
-      fpga_set_reset (wValueL);
-      break;
-      
-    case VRQ_FPGA_SET_TX_ENABLE:
-      fpga_set_tx_enable (wValueL);
-      break;
-      
     case VRQ_FPGA_SET_RX_ENABLE:
       fpga_set_rx_enable (wValueL);
       break;
 
-    case VRQ_FPGA_SET_TX_RESET:
-      fpga_set_tx_reset (wValueL);
-      break;
-      
     case VRQ_FPGA_SET_RX_RESET:
       fpga_set_rx_reset (wValueL);
       break;
@@ -200,23 +179,17 @@ main_loop (void)
 
       // OK, GPIF is idle.  Let's try to give it some work.
 
-      /*
-      // First check for underruns and overruns
+      // First check for overruns
 
-
-      if (UC_BOARD_HAS_FPGA && (USRP_PA & (bmPA_TX_UNDERRUN | bmPA_RX_OVERRUN))){
+      if (UC_BOARD_HAS_FPGA && (GPIFREADYSTAT & bmFPGA_RX_OVERRUN)){
       
-	// record the under/over run
-	if (USRP_PA & bmPA_TX_UNDERRUN)
-	  g_tx_underrun = 1;
-
-	if (USRP_PA & bmPA_RX_OVERRUN)
+	// record the over run
+	if (GPIFREADYSTAT & bmFPGA_RX_OVERRUN)
 	  g_rx_overrun = 1;
 
 	// tell the FPGA to clear the flags
 	fpga_clear_flags ();
       }
-      */
 
       // See if there are any requests for "IN" packets, and if so
       // whether the FPGA's got any packets for us.
@@ -291,9 +264,7 @@ main (void)
 {
 #if 0
   g_rx_enable = 0;	// FIXME (work around initialization bug)
-  g_tx_enable = 0;
   g_rx_overrun = 0;
-  g_tx_underrun = 0;
 #endif
 
   memset (hash1, 0, USRP_HASH_SIZE);	// zero fpga bitstream hash.  This forces reload

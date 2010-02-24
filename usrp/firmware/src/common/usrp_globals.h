@@ -22,11 +22,8 @@
 #ifndef _USRP_GLOBALS_H_
 #define _USRP_GLOBALS_H_
 
-extern unsigned char g_tx_enable;
 extern unsigned char g_rx_enable;
-extern unsigned char g_fpga_reset;
 extern unsigned char g_rx_overrun;
-extern unsigned char g_tx_underrun;
 
 
 #endif /* _USRP_GLOBALS_H_ */

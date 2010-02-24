@@ -26,7 +26,6 @@
 #include "usrp_globals.h"
 #include "spi.h"
 
-unsigned char g_tx_reset = 0;
 unsigned char g_rx_reset = 0;
 
 void
@@ -45,31 +44,13 @@ static void
 write_fpga_master_ctrl (void)
 {
   unsigned char v = 0;
-  if (g_tx_enable)
-    v |= bmFR_MC_ENABLE_TX;
   if (g_rx_enable)
     v |= bmFR_MC_ENABLE_RX;
-  if (g_tx_reset)
-    v |= bmFR_MC_RESET_TX;
   if (g_rx_reset)
     v |= bmFR_MC_RESET_RX;
   regval[3] = v;
 
   fpga_write_reg (FR_MASTER_CTRL, regval);
-}
-
-void
-fpga_set_tx_enable (unsigned char on)
-{
-  on &= 0x1;
-  g_tx_enable = on;
-
-  write_fpga_master_ctrl ();
-
-  if (on){
-    g_tx_underrun = 0;
-    fpga_clear_flags ();
-  }
 }
 
 void
@@ -83,15 +64,6 @@ fpga_set_rx_enable (unsigned char on)
     g_rx_overrun = 0;
     fpga_clear_flags ();
   }
-}
-
-void
-fpga_set_tx_reset (unsigned char on)
-{
-  on &= 0x1;
-  g_tx_reset = on;
-
-  write_fpga_master_ctrl ();
 }
 
 void

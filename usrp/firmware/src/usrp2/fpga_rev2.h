@@ -21,10 +21,7 @@
 #ifndef INCLUDED_FPGA_REV1_H
 #define INCLUDED_FPGA_REV1_H
 
-void fpga_set_reset (unsigned char v);
-void fpga_set_tx_enable (unsigned char v);
 void fpga_set_rx_enable (unsigned char v);
-void fpga_set_tx_reset (unsigned char v);
 void fpga_set_rx_reset (unsigned char v);
 
 unsigned char fpga_has_room_for_packet (void);
@@ -50,8 +47,8 @@ unsigned char fpga_has_packet_avail (void);
 
 #define	fpga_clear_flags()				\
 	do {						\
-	  USRP_PE |= bmPE_FPGA_CLR_STATUS;		\
-	  USRP_PE &= ~bmPE_FPGA_CLR_STATUS;		\
+	  GPIFIDLECTL |= bmFPGA_CLEAR_OVERRUN;		\
+	  GPIFIDLECTL &= ~bmFPGA_CLEAR_OVERRUN;		\
         } while (0)
 
 
