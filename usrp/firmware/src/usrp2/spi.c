@@ -28,10 +28,12 @@ setup_enables (unsigned char enables)
 {
   // Software eanbles are active high.
   // Hardware enables are active low.
+  
+  // FPGA enable is active high.
   if (enables & SPI_ENABLE_FPGA) {
-    USRP_PA &= ~bmPA_SEN_FPGA;
-  } else {
     USRP_PA |= bmPA_SEN_FPGA;
+  } else {
+    USRP_PA &= ~bmPA_SEN_FPGA;
   }
 }
 
