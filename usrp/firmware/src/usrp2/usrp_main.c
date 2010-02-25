@@ -221,8 +221,6 @@ main_loop (void)
 }
 
 
-void spi_test(const unsigned char xdata buffer[8]);
-
 /*
  * called at 100 Hz from timer2 interrupt
  *
@@ -232,18 +230,12 @@ void
 isr_tick (void) interrupt
 {
   static unsigned char	count = 1;
-  static unsigned char xdata buffer[8];
   
   if (--count == 0){
     count = 50;
     IOC ^= bmPC_TICK;
   }
   
-  buffer[0] = 0x7f;
-  buffer[4] = 0xff;
-  buffer[7] = count;
-  spi_test(buffer);
-
   clear_timer_irq ();
 }
 
