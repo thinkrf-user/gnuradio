@@ -60,20 +60,23 @@
 /*
  * SPI_ENABLE_*  goes in wIndexH
  *
- * For the software interface, the enables are active high.
- * For reads, it's an error to have more than one enable set.
+ * Only one value may be specified at a time. The FPGA decodes the value into
+ * one active low slave select.
  *
- * [FWIW, the hardware implements them as active low.  Don't change the
- * definitions of these.  They are related to usrp_rev1_regs.h]
  */
+#define	SPI_ENABLE_NONE		0x00	// all slaves deselected
 #define	SPI_ENABLE_FPGA		0x01	// select FPGA
-#define	SPI_ENABLE_CODEC_A	0x02	// select AD9862 A
-#define	SPI_ENABLE_CODEC_B	0x04	// select AD9862 B
-#define	SPI_ENABLE_reserved	0x08
-#define	SPI_ENABLE_TX_A		0x10	// select d'board TX A
-#define	SPI_ENABLE_RX_A		0x20	// select d'board RX A
-#define	SPI_ENABLE_TX_B		0x40	// select d'board TX B
-#define	SPI_ENABLE_RX_B		0x80	// select d'board RX B
+#define	SPI_ENABLE_CODEC	0x02	// select AD9640
+#define	SPI_ENABLE_VCO		0x03	// select ADF4350
+
+/* many USRP primitives rely on the existence of these, but they are not
+   relevant in ThinkRF WSA1000 */
+#define	SPI_ENABLE_CODEC_A	SPI_ENABLE_NONE
+#define	SPI_ENABLE_CODEC_B	SPI_ENABLE_NONE
+#define	SPI_ENABLE_TX_A		SPI_ENABLE_NONE
+#define	SPI_ENABLE_TX_B		SPI_ENABLE_NONE
+#define	SPI_ENABLE_RX_A		SPI_ENABLE_NONE
+#define	SPI_ENABLE_RX_B		SPI_ENABLE_NONE
 
 /*
  * If there's one header byte, it goes in wValueL.

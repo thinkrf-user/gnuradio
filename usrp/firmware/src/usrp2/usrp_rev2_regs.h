@@ -37,8 +37,8 @@
 /* TODO: What are J4[15] and J4[19] */
 #define	bmPA_INT_PCA		bmBIT0		// I2C GPIO (U30) interrupt
 #define	bmPA_J4_15		bmBIT1		// daughterboard I/O
-#define	bmPA_SEN_FPGA		bmBIT2		// serial enable for FPGA (active high)
-#define	bmPA_FPGA_RDY		bmBIT3		// ready status from FPGA (active high)
+#define	bmPA_SS0		bmBIT2		// slave select 0
+#define	bmPA_SS1		bmBIT3		// slave select 1
 #define	bmPA_S_CLK		bmBIT4		// SPI serial clock
 #define	bmPA_S_DATA_FROM_PERIPH	bmBIT5		// SPI SDO (peripheral rel name)
 #define	bmPA_S_DATA_TO_PERIPH	bmBIT6		// SPI SDI (peripheral rel name)
@@ -50,12 +50,13 @@ sbit at 0x80+5 bitS_IN;			// in from FX2 point of view
 sbit at 0x80+6 bitS_OUT;		// out from FX2 point of view
 
 
-#define	bmPORT_A_OUTPUTS  (bmPA_SEN_FPGA		\
+#define	bmPORT_A_OUTPUTS  (bmPA_SS0		\
+			   | bmPA_SS1		\
 			   | bmPA_S_CLK			\
 			   | bmPA_S_DATA_TO_PERIPH	\
 			   )
 
-#define	bmPORT_A_INITIAL   (bmPA_SEN_FPGA)
+#define	bmPORT_A_INITIAL   (0)
 
 
 /*
