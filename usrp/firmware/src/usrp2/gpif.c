@@ -73,18 +73,18 @@
 //          _________ _________ _________ _________ _________ _________ _________ _________
 //                                                                                         
 // AddrMode Same Val  Same Val  Same Val  Same Val  Same Val  Same Val  Same Val           
-// DataMode Activate  Activate  Activate  Activate  Activate  Activate  Activate           
+// DataMode NO Data   NO Data   NO Data   NO Data   NO Data   NO Data   NO Data            
 // NextData SameData  SameData  SameData  SameData  SameData  SameData  SameData           
 // Int Trig No Int    No Int    No Int    No Int    No Int    No Int    No Int             
-// IF/Wait  Wait 1    IF        Wait 1    Wait 1    Wait 1    Wait 1    Wait 1             
-//   Term A           EF#                                                                  
-//   LFunc            AND                                                                  
-//   Term B           EF#                                                                  
-// Branch1            ThenIdle                                                             
-// Branch0            ElseIdle                                                             
-// Re-Exec            No                                                                   
+// IF/Wait  Wait 1    Wait 1    Wait 1    Wait 1    Wait 1    Wait 1    Wait 1             
+//   Term A                                                                                
+//   LFunc                                                                                 
+//   Term B                                                                                
+// Branch1                                                                                 
+// Branch0                                                                                 
+// Re-Exec                                                                                 
 // Sngl/CRC Default   Default   Default   Default   Default   Default   Default            
-// WEN#         0         1         1         1         1         1         1         0    
+// WEN#         0         0         0         0         0         0         0         0    
 // REN#         0         0         0         0         0         0         0         0    
 // OE#          0         0         0         0         0         0         0         0    
 // CLRST        0         0         0         0         0         0         0         0    
@@ -127,16 +127,16 @@
 //          _________ _________ _________ _________ _________ _________ _________ _________
 //                                                                                         
 // AddrMode Same Val  Same Val  Same Val  Same Val  Same Val  Same Val  Same Val           
-// DataMode NO Data   Activate  Activate  Activate  Activate  Activate  Activate           
+// DataMode NO Data   NO Data   NO Data   NO Data   NO Data   NO Data   NO Data            
 // NextData SameData  SameData  SameData  SameData  SameData  SameData  SameData           
 // Int Trig No Int    No Int    No Int    No Int    No Int    No Int    No Int             
-// IF/Wait  Wait 1    IF        Wait 1    Wait 1    Wait 1    Wait 1    Wait 1             
-//   Term A           TCXpire                                                              
-//   LFunc            AND                                                                  
-//   Term B           TCXpire                                                              
-// Branch1            ThenIdle                                                             
-// Branch0            Else 1                                                               
-// Re-Exec            No                                                                   
+// IF/Wait  Wait 1    Wait 1    Wait 1    Wait 1    Wait 1    Wait 1    Wait 1             
+//   Term A                                                                                
+//   LFunc                                                                                 
+//   Term B                                                                                
+// Branch1                                                                                 
+// Branch0                                                                                 
+// Re-Exec                                                                                 
 // Sngl/CRC Default   Default   Default   Default   Default   Default   Default            
 // WEN#         0         0         0         0         0         0         0         0    
 // REN#         0         0         0         0         0         0         0         0    
@@ -164,9 +164,9 @@ const char xdata WaveData[128] =
 /* Output*/ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* LFun  */ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x3F,
 // Wave 1 
-/* LenBr */ 0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x22,     0x03,     0x02,     0x02,     0x02,     0x02,     0x02,     0x00,
-/* Output*/ 0x00,     0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x00,
+/* LenBr */ 0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x07,
+/* Opcode*/ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,
+/* Output*/ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* LFun  */ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x3F,
 // Wave 2 
 /* LenBr */ 0x01,     0x11,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x07,
@@ -174,10 +174,10 @@ const char xdata WaveData[128] =
 /* Output*/ 0x06,     0x04,     0x04,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* LFun  */ 0x00,     0x2D,     0x00,     0x2D,     0x00,     0x00,     0x00,     0x3F,
 // Wave 3 
-/* LenBr */ 0x01,     0x39,     0x01,     0x01,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x00,     0x03,     0x02,     0x02,     0x02,     0x02,     0x02,     0x00,
+/* LenBr */ 0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x07,
+/* Opcode*/ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,
-/* LFun  */ 0x00,     0x2D,     0x00,     0x00,     0x00,     0x00,     0x00,     0x3F,
+/* LFun  */ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x3F,
 };                     
 // END DO NOT EDIT     
                        
@@ -187,7 +187,7 @@ const char xdata FlowStates[36] =
 /* Wave 0 FlowStates */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 /* Wave 1 FlowStates */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 /* Wave 2 FlowStates */ 0x81,0x2D,0x26,0x00,0x04,0x04,0x03,0x02,0x00,
-/* Wave 3 FlowStates */ 0x81,0x2D,0x21,0x00,0x04,0x04,0x03,0x02,0x00,
+/* Wave 3 FlowStates */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 };                     
 // END DO NOT EDIT     
                        
