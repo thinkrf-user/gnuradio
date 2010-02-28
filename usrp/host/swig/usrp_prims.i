@@ -34,8 +34,10 @@
 
 %include <stl.i>	// pick up string stuff
 %include <carrays.i>
+%include <cpointer.i>
 
 %array_class(unsigned char, ucharArray)
+%pointer_class(bool, boolp)
 
 %{
 #include <usrp/usrp_prims.h>
