@@ -33,7 +33,9 @@
  */
 
 %include <stl.i>	// pick up string stuff
+%include <carrays.i>
 
+%array_class(unsigned char, ucharArray)
 
 %{
 #include <usrp/usrp_prims.h>
@@ -168,6 +170,8 @@ bool usrp_i2c_write (libusb_device_handle *udh, int i2c_addr,
 
 bool usrp_i2c_read (libusb_device_handle *udh, int i2c_addr,
 		    void *buf, int len);
+
+%include <usrp_spi_defs.h>
 
 // spi_read and spi_write are limited to a maximum of 64 bytes
 // See usrp_spi_defs.h for more info
