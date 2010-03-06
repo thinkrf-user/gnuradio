@@ -873,6 +873,9 @@ public:
   // called in base class to derived class order
   bool start ();
   bool stop ();
+
+  fusb_devhandle *devhandle() const { return d_devhandle; }
+  fusb_ephandle *ephandle() const { return d_ephandle; }
 };
 
 /*!

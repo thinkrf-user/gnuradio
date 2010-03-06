@@ -34,16 +34,19 @@
 #include "time_stuff.h"
 #include <usrp/usrp_standard.h>
 #include <usrp/usrp_bytesex.h>
+#include "../lib/fusb.h"
 #include "fpga_regs_common.h"
 #include "fpga_regs_standard.h"
 
 #ifdef HAVE_SCHED_H
 #include <sched.h>
 #endif
+#include <sys/param.h>
 
 char *prog_name;
 
 static bool test_input  (usrp_standard_rx_sptr urx, int max_bytes, FILE *fp);
+static bool test_bulkread  (usrp_standard_rx_sptr urx, int max_bytes, FILE *fp);
 
 static void
 set_progname (char *path)
@@ -134,7 +137,7 @@ main (int argc, char **argv)
       break;
 
     case 'M':
-      max_bytes = strtol (optarg, 0, 0) * (1L << 20);
+      max_bytes = strtol (optarg, 0, 0) /* * (1L << 20) */;
       if (max_bytes < 0) max_bytes = 0;
       break;
 
@@ -208,7 +211,7 @@ main (int argc, char **argv)
 
   urx->start();		// start data xfers
 
-  test_input (urx, max_bytes, fp);
+  /*test_input*/ test_bulkread (urx, max_bytes, fp);
 
   if (fp)
     fclose (fp);
@@ -269,5 +272,35 @@ test_input  (usrp_standard_rx_sptr urx, int max_bytes, FILE *fp)
 	  (double) max_bytes, delta_wall, max_bytes / delta_wall, delta_cpu);
   printf ("noverruns = %d\n", noverruns);
 
+  return true;
+}
+
+static bool
+test_bulkread(usrp_standard_rx_sptr urx, int max_bytes, FILE *fp)
+{
+  usb_dev_handle *dev = urx->devhandle()->get_usb_dev_handle();
+  
+  int fd = 1;
+  if (fp) {
+    fd = fileno(fp);
+  }
+  
+  int bytes_read = 0;
+  
+  while (bytes_read < max_bytes || max_bytes == 0) {
+    char buffer[65536];
+    int to_read = MIN(sizeof(buffer), max_bytes - bytes_read);
+
+    int ret = usb_bulk_read(dev, 0x86, buffer, to_read, 1000);
+    
+    if (ret < 0) {
+      fprintf(stderr, "usb_bulk_read: error %d\n", ret);
+      return false;
+    }
+    
+    write(fd, buffer, ret);
+    bytes_read += ret;
+  }
+  
   return true;
 }
