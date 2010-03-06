@@ -24,25 +24,15 @@ EXTRA_DIST = 			\
 	blink_leds.c		\
 	check_mdelay.c		\
 	check_udelay.c		\
-	edit-gpif		\
 	fpga.h			\
-	gpif.c			\
-	gpif.gpf		\
 	init_gpif.c		\
 	usrp_common.c		\
 	usrp_globals.h		\
 	vectors.a51		\
 	build_eeprom.py		
 
-all: usrp_gpif.c
-
-usrp_gpif.c usrp_gpif_inline.h : gpif.c
-	srcdir=$(srcdir) $(PYTHON) $(srcdir)/edit-gpif $(srcdir)/gpif.c usrp_gpif.c usrp_gpif_inline.h
-
 CLEANFILES = \
-	*.ihx *.lnk *.lst *.map *.mem *.rel *.rst *.sym *.asm *.lib \
-	usrp_gpif.c usrp_gpif_inline.h
+	*.ihx *.lnk *.lst *.map *.mem *.rel *.rst *.sym *.asm *.lib
 
 DISTCLEANFILES = \
-	*.ihx *.lnk *.lst *.map *.mem *.rel *.rst *.sym *.asm *.lib \
-	usrp_gpif.c usrp_gpif_inline.h 
+	*.ihx *.lnk *.lst *.map *.mem *.rel *.rst *.sym *.asm *.lib
