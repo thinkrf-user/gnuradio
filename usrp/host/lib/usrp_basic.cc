@@ -31,6 +31,7 @@
 #include "fpga_regs_standard.h"
 #include "fusb.h"
 #include "db_boards.h"
+#include "usrp/usrp_dbid.h"
 #include <stdexcept>
 #include <assert.h>
 #include <math.h>
@@ -985,43 +986,14 @@ usrp_basic_rx::restore_rx (bool on)
 void
 usrp_basic_rx::probe_rx_slots (bool verbose)
 {
-  struct usrp_dboard_eeprom	eeprom;
-  static int slot_id_map[2] = { SLOT_RX_A, SLOT_RX_B };
   static const char *slot_name[2] = { "RX d'board A", "RX d'board B" };
 
+  // TODO: automatically detect daughterboard
+  d_dbid[0] = USRP_DBID_THINKRF_827_RX;
+  d_dbid[1] = -1; // none
+
   for (int i = 0; i < 2; i++){
-    int slot_id = slot_id_map [i];
-    const char *msg = 0;
-    usrp_dbeeprom_status_t s = usrp_read_dboard_eeprom (d_udh, slot_id, &eeprom);
-
-    switch (s){
-    case UDBE_OK:
-      d_dbid[i] = eeprom.id;
-      msg = usrp_dbid_to_string (eeprom.id).c_str ();
-      set_adc_offset (2*i+0, eeprom.offset[0]);
-      set_adc_offset (2*i+1, eeprom.offset[1]);
-      _write_fpga_reg (slot_id_to_oe_reg(slot_id), (0xffff << 16) | eeprom.oe);
-      _write_fpga_reg (slot_id_to_io_reg(slot_id), (0xffff << 16) | 0x0000);
-      break;
-
-    case UDBE_NO_EEPROM:
-      d_dbid[i] = -1;
-      msg = "<none>";
-      _write_fpga_reg (slot_id_to_oe_reg(slot_id), (0xffff << 16) | 0x0000);
-      _write_fpga_reg (slot_id_to_io_reg(slot_id), (0xffff << 16) | 0x0000);
-      break;
-
-    case UDBE_INVALID_EEPROM:
-      d_dbid[i] = -2;
-      msg = "Invalid EEPROM contents";
-      _write_fpga_reg (slot_id_to_oe_reg(slot_id), (0xffff << 16) | 0x0000);
-      _write_fpga_reg (slot_id_to_io_reg(slot_id), (0xffff << 16) | 0x0000);
-      break;
-
-    case UDBE_BAD_SLOT:
-    default:
-      assert (0);
-    }
+    const char *msg = usrp_dbid_to_string (d_dbid[i]).c_str();
 
     if (verbose){
       fflush (stdout);
