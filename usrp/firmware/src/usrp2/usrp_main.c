@@ -174,7 +174,6 @@ main_loop (void)
       usb_handle_setup_packet ();
     
   
-    /*
     if (GPIFTRIG & bmGPIF_IDLE){
 
       // OK, GPIF is idle.  Let's try to give it some work.
@@ -216,7 +215,6 @@ main_loop (void)
 	}
       }
     }
-    */
   }
 }
 
