@@ -100,20 +100,20 @@
 //          _________ _________ _________ _________ _________ _________ _________ _________
 //                                                                                         
 // AddrMode Same Val  Same Val  Same Val  Same Val  Same Val  Same Val  Same Val           
-// DataMode NO Data   Activate  NO Data   NO Data   NO Data   NO Data   NO Data            
+// DataMode NO Data   Activate  Activate  Activate  Activate  Activate  Activate           
 // NextData SameData  SameData  SameData  SameData  SameData  SameData  SameData           
 // Int Trig No Int    No Int    No Int    No Int    No Int    No Int    No Int             
-// IF/Wait  Wait 1    IF        Wait 1    IF        Wait 1    Wait 1    Wait 1             
-//   Term A           TCXpire             TCXpire                                          
-//   LFunc            AND                 AND                                              
-//   Term B           TCXpire             TCXpire                                          
-// Branch1            Then 2              ThenIdle                                         
-// Branch0            Else 1              ElseIdle                                         
-// Re-Exec            No                  No                                               
+// IF/Wait  Wait 1    IF        Wait 1    Wait 1    Wait 1    Wait 1    Wait 1             
+//   Term A           TCXpire                                                              
+//   LFunc            AND                                                                  
+//   Term B           TCXpire                                                              
+// Branch1            ThenIdle                                                             
+// Branch0            Else 1                                                               
+// Re-Exec            Yes                                                                  
 // Sngl/CRC Default   Default   Default   Default   Default   Default   Default            
 // WEN#         0         0         0         0         0         0         0         0    
-// REN#         1         0         0         0         0         0         0         0    
-// OE#          1         1         1         0         0         0         0         0    
+// REN#         1         1         1         1         1         1         1         0    
+// OE#          1         1         1         1         1         1         1         0    
 // CLRST        0         0         0         0         0         0         0         0    
 // unused       0         0         0         0         0         0         0         0    
 // BOGUS        0         0         0         0         0         0         0         0    
@@ -169,10 +169,10 @@ const char xdata WaveData[128] =
 /* Output*/ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* LFun  */ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x3F,
 // Wave 2 
-/* LenBr */ 0x01,     0x11,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x00,     0x03,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,
-/* Output*/ 0x06,     0x04,     0x04,     0x00,     0x00,     0x00,     0x00,     0x00,
-/* LFun  */ 0x00,     0x2D,     0x00,     0x2D,     0x00,     0x00,     0x00,     0x3F,
+/* LenBr */ 0x01,     0xB9,     0x01,     0x01,     0x01,     0x01,     0x01,     0x07,
+/* Opcode*/ 0x00,     0x03,     0x02,     0x02,     0x02,     0x02,     0x02,     0x00,
+/* Output*/ 0x06,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,     0x00,
+/* LFun  */ 0x00,     0x2D,     0x00,     0x00,     0x00,     0x00,     0x00,     0x3F,
 // Wave 3 
 /* LenBr */ 0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,
@@ -186,7 +186,7 @@ const char xdata FlowStates[36] =
 {                                      
 /* Wave 0 FlowStates */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 /* Wave 1 FlowStates */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-/* Wave 2 FlowStates */ 0x81,0x2D,0x26,0x00,0x04,0x04,0x03,0x02,0x00,
+/* Wave 2 FlowStates */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 /* Wave 3 FlowStates */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 };                     
 // END DO NOT EDIT     
