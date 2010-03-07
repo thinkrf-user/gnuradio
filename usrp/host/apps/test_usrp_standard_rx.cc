@@ -137,7 +137,7 @@ main (int argc, char **argv)
       break;
 
     case 'M':
-      max_bytes = strtol (optarg, 0, 0) /* * (1L << 20) */;
+      max_bytes = strtol (optarg, 0, 0) * (1L << 20);
       if (max_bytes < 0) max_bytes = 0;
       break;
 
@@ -211,7 +211,9 @@ main (int argc, char **argv)
 
   urx->start();		// start data xfers
 
-  /*test_input*/ test_bulkread (urx, max_bytes, fp);
+  test_input
+  //test_bulkread
+    (urx, max_bytes, fp);
 
   if (fp)
     fclose (fp);
@@ -286,6 +288,7 @@ test_bulkread(usrp_standard_rx_sptr urx, int max_bytes, FILE *fp)
   }
   
   int bytes_read = 0;
+  max_bytes >>= 20;
   
   while (bytes_read < max_bytes || max_bytes == 0) {
     char buffer[65536];
