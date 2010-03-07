@@ -289,7 +289,10 @@ test_bulkread(usrp_standard_rx_sptr urx, int max_bytes, FILE *fp)
   
   while (bytes_read < max_bytes || max_bytes == 0) {
     char buffer[65536];
-    int to_read = MIN(sizeof(buffer), max_bytes - bytes_read);
+    int to_read = sizeof(buffer);
+    if (max_bytes && bytes_read + to_read > max_bytes) {
+      to_read = max_bytes - bytes_read;
+    }
 
     int ret = usb_bulk_read(dev, 0x86, buffer, to_read, 1000);
     
