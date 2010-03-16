@@ -53,7 +53,7 @@
 #define ATTN_MASK	(63 << ATTN_SHIFT)
 
 thinkrf827_base::thinkrf827_base(usrp_basic_sptr _usrp, int which, int _power_on)
-  : db_base(_usrp, which), d_power_on(_power_on)
+  : db_base(_usrp, which), d_power_on(_power_on), d_common(NULL)
 {
   /*
     @param usrp: instance of usrp.source_c
