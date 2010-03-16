@@ -37,6 +37,7 @@
 #include <usrp/db_dtt754.h>
 #include <usrp/db_dtt768.h>
 #include <usrp/db_bitshark_rx.h>
+#include <usrp/db_thinkrf827.h>
 #include <cstdio>
 
 std::vector<db_base_sptr>
@@ -212,6 +213,10 @@ instantiate_dbs(int dbid, usrp_basic_sptr usrp, int which_side)
 
   case(USRP_DBID_BITSHARK_RX):
     db.push_back(db_base_sptr(new db_bitshark_rx(usrp, which_side)));
+    break;
+
+  case(USRP_DBID_THINKRF_827_RX):
+    db.push_back(db_base_sptr(new db_thinkrf827_rx(usrp, which_side)));
     break;
 
   case(-1):

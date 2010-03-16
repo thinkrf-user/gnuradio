@@ -128,6 +128,7 @@ libusrp_la_common_SOURCES = 		\
 	db_dbs_rx.cc			\
 	db_wbxng.cc			\
 	db_xcvr2450.cc			\
+	db_thinkrf827.cc		\
 	db_dtt754.cc			\
 	db_dtt768.cc			\
 	db_util.cc
