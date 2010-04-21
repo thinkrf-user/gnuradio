@@ -87,8 +87,8 @@ thinkrf827_base::set_freq(double freq)
   */
 
   freq_t int_freq = freq_t(freq);
-  bool ok = d_common->_set_freq(int_freq*2);
-  double freq_result = (double) d_common->_get_freq()/2.0;
+  bool ok = d_common->_set_freq(int_freq);
+  double freq_result = (double) d_common->_get_freq();
   struct freq_result_t args = {ok, freq_result};
 
   /* Wait before reading Lock Detect*/
@@ -159,14 +159,7 @@ thinkrf827_base_rx::thinkrf827_base_rx(usrp_basic_sptr _usrp, int which, int _po
     @param which: 0 or 1 corresponding to side RX_A or RX_B respectively.
   */
 
-  if(which == 0) {
-    d_spi_enable = SPI_ENABLE_RX_A;
-  }
-  else {
-    d_spi_enable = SPI_ENABLE_RX_B;
-  }
-
-  d_common = new adf4350(_usrp, d_which, d_spi_enable);
+  d_common = new adf4350(_usrp, d_which, SPI_ENABLE_VCO);
   
   // Disable VCO/PLL
   d_common->_enable(true);
