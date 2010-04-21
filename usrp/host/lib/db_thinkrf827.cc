@@ -34,23 +34,12 @@
 #include <stdio.h>
 
 // d'board i/o pin defs
-// Tx and Rx have shared defs, but different i/o regs
-#define ENABLE_5        (1 << 7)         // enables 5.0V power supply
-#define ENABLE_33       (1 << 6)         // enables 3.3V supply
-//#define RX_TXN          (1 << 15)         // Tx only: T/R antenna switch for TX/RX port
-//#define RX2_RX1N        (1 << 15)         // Rx only: antenna switch between RX2 and TX/RX port
-#define RX_TXN          ((1 << 5)|(1 << 15))         // Tx only: T/R antenna switch for TX/RX port
-#define RX2_RX1N        ((1 << 5)|(1 << 15))         // Rx only: antenna switch between RX2 and TX/RX port
-#define RXBB_EN         (1 << 4)
-#define TXMOD_EN        (1 << 4)
-#define PLL_CE          (1 << 3)
-#define PLL_PDBRF       (1 << 2)
-#define PLL_MUXOUT      (1 << 1)
-#define PLL_LOCK_DETECT (1 << 0)
-
-// RX Attenuator constants
-#define ATTN_SHIFT	8
-#define ATTN_MASK	(63 << ATTN_SHIFT)
+#define RFDC1_VSWA      (1 << 0)
+#define RFDC1_VSWB      (1 << 1)
+#define RFDC1_VSWC      (1 << 2)
+#define RFDC1_VSWD      (1 << 3)  // LED1
+#define RFDC1_FILTER_A0 (1 << 4)
+#define RFDC1_FILTER_A1 (1 << 5)
 
 thinkrf827_base::thinkrf827_base(usrp_basic_sptr _usrp, int which, int _power_on)
   : db_base(_usrp, which), d_power_on(_power_on), d_common(NULL)
@@ -164,9 +153,9 @@ thinkrf827_base_rx::thinkrf827_base_rx(usrp_basic_sptr _usrp, int which, int _po
   // Disable VCO/PLL
   d_common->_enable(true);
 
-  usrp()->_write_oe(d_which, (RX2_RX1N|RXBB_EN|ATTN_MASK|ENABLE_33|ENABLE_5), (RX2_RX1N|RXBB_EN|ATTN_MASK|ENABLE_33|ENABLE_5));
-  usrp()->write_io(d_which,  (power_on()|RX2_RX1N|RXBB_EN|ENABLE_33|ENABLE_5), (RX2_RX1N|RXBB_EN|ATTN_MASK|ENABLE_33|ENABLE_5));
-  //fprintf(stderr,"Setting WBXNG RXBB on");
+  // TODO: Initialize daughterboard I/Os
+  //usrp()->_write_oe(d_which, ?, ?);
+  //usrp()->write_io(d_which,  ?, ?);
 
   // set up for RX on TX/RX port
   select_rx_antenna("TX/RX");
@@ -205,7 +194,7 @@ thinkrf827_base_rx::shutdown()
     set_auto_tr(false);
 
     // Power down
-    usrp()->write_io(d_which, power_off(), (RX2_RX1N|RXBB_EN|ATTN_MASK|ENABLE_33|ENABLE_5));
+    //usrp()->write_io(d_which, ?, ?);
 
     // fprintf(stderr, "thinkrf827_base_rx::shutdown  after set_auto_tr\n");
   }
@@ -214,60 +203,23 @@ thinkrf827_base_rx::shutdown()
 bool
 thinkrf827_base_rx::set_auto_tr(bool on)
 {
-  bool ok = true;
-  if(on) {
-    ok &= set_atr_mask (RXBB_EN|RX2_RX1N);
-    ok &= set_atr_txval(      0|RX2_RX1N);
-    ok &= set_atr_rxval(RXBB_EN|       0);
-  }
-  else {
-    ok &= set_atr_mask (0);
-    ok &= set_atr_txval(0);
-    ok &= set_atr_rxval(0);
-  }
-  return true;
+  return false;
 }
 
 bool
 thinkrf827_base_rx::select_rx_antenna(int which_antenna)
 {
-  /*
-    Specify which antenna port to use for reception.
-    @param which_antenna: either 'TX/RX' or 'RX2'
-  */
-
-  if(which_antenna == 0) {
-    usrp()->write_io(d_which, 0,RX2_RX1N);
-  }
-  else if(which_antenna == 1) {
-    usrp()->write_io(d_which, RX2_RX1N, RX2_RX1N);
-  }
-  else {
-    return false;
-  }
-  return true;
+  return which_antenna == 0;
 }
 
 bool
 thinkrf827_base_rx::select_rx_antenna(const std::string &which_antenna)
 {
-  /*
-    Specify which antenna port to use for reception.
-    @param which_antenna: either 'TX/RX' or 'RX2'
-  */
-
-
-  if(which_antenna == "TX/RX") {
-    usrp()->write_io(d_which, 0, RX2_RX1N);
-  }
-  else if(which_antenna == "RX2") {
-    usrp()->write_io(d_which, RX2_RX1N, RX2_RX1N);
-  }
-  else {
+  if (which_antenna == "J1") {
+    return select_rx_antenna(0);
+  } else {
     return false;
   }
-
-  return true;
 }
 
 bool
@@ -303,10 +255,9 @@ thinkrf827_base_rx::set_gain(float gain)
 bool
 thinkrf827_base_rx::_set_attn(float attn)
 {
-  int attn_code = int(floor(attn/0.5));
-  unsigned int iobits = (~attn_code) << ATTN_SHIFT;
   //fprintf(stderr, "Attenuation: %f dB, Code: %d, IO Bits %x, Mask: %x \n", attn, attn_code, iobits & ATTN_MASK, ATTN_MASK);
-  return usrp()->write_io(d_which, iobits, ATTN_MASK);
+  //return usrp()->write_io(d_which, ?, ?);
+  return true;
 }
 
 // ----------------------------------------------------------------
