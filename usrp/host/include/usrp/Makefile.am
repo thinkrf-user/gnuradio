@@ -37,6 +37,7 @@ usrpinclude_HEADERS = \
 	db_wbxng.h \
 	db_xcvr2450.h \
 	db_thinkrf827.h \
+	db_thinkrf440.h \
 	libusb_types.h \
 	usrp_basic.h \
 	usrp_bytesex.h \
