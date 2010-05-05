@@ -1,5 +1,6 @@
 /* -*- c++ -*- */
 //
+// Copyright 2010 ThinkRF, Inc.
 // Copyright 2009 Free Software Foundation, Inc.
 //
 // This file is part of GNU Radio
@@ -23,6 +24,8 @@
 // Include file for ThinkRF 800-2700 daughterboard.
 //
 // Mostly taken from db_wbxng.h
+//
+// Written by: catalin.patulea@thinkrf.com
 //
 
 #ifndef INCLUDED_DB_THINKRF827_H

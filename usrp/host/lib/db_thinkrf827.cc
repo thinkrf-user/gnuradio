@@ -1,4 +1,5 @@
 //
+// Copyright 2010 ThinkRF, Inc.
 // Copyright 2008,2009 Free Software Foundation, Inc.
 //
 // This file is part of GNU Radio
@@ -22,6 +23,8 @@
 // Implementation for ThinkRF 800-2700 daughterboard.
 //
 // Mainly taken from db_wbxng.cc.
+//
+// Written by: catalin.patulea@thinkrf.com
 //
 
 #ifdef HAVE_CONFIG_H
