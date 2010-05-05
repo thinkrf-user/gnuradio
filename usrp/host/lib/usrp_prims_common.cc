@@ -514,30 +514,35 @@ usrp_read_fpga_reg (libusb_device_handle *udh, int reg, int *value)
 bool
 usrp_set_fpga_reset (libusb_device_handle *udh, bool on)
 {
+  fprintf(stderr, "usrp_set_fpga_reset(on=%d)\n", on);
   return usrp_set_switch (udh, VRQ_FPGA_SET_RESET, on);
 }
 
 bool
 usrp_set_fpga_tx_enable (libusb_device_handle *udh, bool on)
 {
+  fprintf(stderr, "usrp_set_fpga_tx_enable(on=%d)\n", on);
   return usrp_set_switch (udh, VRQ_FPGA_SET_TX_ENABLE, on);
 }
 
 bool
 usrp_set_fpga_rx_enable (libusb_device_handle *udh, bool on)
 {
+  fprintf(stderr, "usrp_set_fpga_rx_enable(on=%d)\n", on);
   return usrp_set_switch (udh, VRQ_FPGA_SET_RX_ENABLE, on);
 }
 
 bool
 usrp_set_fpga_tx_reset (libusb_device_handle *udh, bool on)
 {
+  fprintf(stderr, "usrp_set_fpga_tx_reset(on=%d)\n", on);
   return usrp_set_switch (udh, VRQ_FPGA_SET_TX_RESET, on);
 }
 
 bool
 usrp_set_fpga_rx_reset (libusb_device_handle *udh, bool on)
 {
+  fprintf(stderr, "usrp_set_fpga_rx_reset(on=%d)\n", on);
   return usrp_set_switch (udh, VRQ_FPGA_SET_RX_RESET, on);
 }
 

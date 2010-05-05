@@ -108,7 +108,7 @@ usrp_basic::usrp_basic (int which_board,
   : d_udh (0), d_ctx (0),
     d_usb_data_rate (16000000),	// SWAG, see below
     d_bytes_per_poll ((int) (POLLING_INTERVAL * d_usb_data_rate)),
-    d_verbose (false), d_fpga_master_clock_freq(50000000), d_db(2)
+    d_verbose (true), d_fpga_master_clock_freq(50000000), d_db(2)
 {
   /*
    * SWAG: Scientific Wild Ass Guess.
@@ -377,11 +377,114 @@ usrp_basic::set_dc_offset_cl_enable(int bits, int mask)
 
 // ----------------------------------------------------------------
 
+static const char *_reg_str(int regno)
+{
+  const struct {
+    int regno;
+    const char name[23];
+  } regs[] = {
+#define _(r) {r, #r}
+    _(FR_TX_SAMPLE_RATE_DIV),
+    _(FR_RX_SAMPLE_RATE_DIV),
+    _(FR_MASTER_CTRL),
+    _(FR_OE_0),
+    _(FR_OE_1),
+    _(FR_OE_2),
+    _(FR_OE_3),
+    _(FR_IO_0),
+    _(FR_IO_1),
+    _(FR_IO_2),
+    _(FR_IO_3),
+    _(FR_MODE),
+    _(FR_DEBUG_EN),
+    _(FR_DC_OFFSET_CL_EN),
+    _(FR_ADC_OFFSET_0),
+    _(FR_ADC_OFFSET_1),
+    _(FR_ADC_OFFSET_2),
+    _(FR_ADC_OFFSET_3),
+    _(FR_ATR_MASK_0),
+    _(FR_ATR_TXVAL_0),
+    _(FR_ATR_RXVAL_0),
+    _(FR_ATR_MASK_1),
+    _(FR_ATR_TXVAL_1),
+    _(FR_ATR_RXVAL_1),
+    _(FR_ATR_MASK_2),
+    _(FR_ATR_TXVAL_2),
+    _(FR_ATR_RXVAL_2),
+    _(FR_ATR_MASK_3),
+    _(FR_ATR_TXVAL_3),
+    _(FR_ATR_RXVAL_3),
+    _(FR_ATR_TX_DELAY),
+    _(FR_ATR_RX_DELAY),
+    _(FR_INTERP_RATE),
+    _(FR_DECIM_RATE),
+    _(FR_RX_FREQ_0),
+    _(FR_RX_FREQ_1),
+    _(FR_RX_FREQ_2),
+    _(FR_RX_FREQ_3),
+    _(FR_RX_MUX),
+    _(FR_TX_MUX),
+    _(FR_TX_A_REFCLK),
+    _(FR_RX_A_REFCLK),
+    _(FR_TX_B_REFCLK),
+    _(FR_RX_B_REFCLK),
+    _(FR_RX_PHASE_0),
+    _(FR_RX_PHASE_1),
+    _(FR_RX_PHASE_2),
+    _(FR_RX_PHASE_3),
+    _(FR_TX_FORMAT),
+    _(FR_RX_FORMAT),
+    _(FR_USER_0),
+    _(FR_USER_1),
+    _(FR_USER_2),
+    _(FR_USER_3),
+    _(FR_USER_4),
+    _(FR_USER_5),
+    _(FR_USER_6),
+    _(FR_USER_7),
+    _(FR_USER_8),
+    _(FR_USER_9),
+    _(FR_USER_10),
+    _(FR_USER_11),
+    _(FR_USER_12),
+    _(FR_USER_13),
+    _(FR_USER_14),
+    _(FR_USER_15),
+    _(FR_USER_16),
+    _(FR_USER_17),
+    _(FR_USER_18),
+    _(FR_USER_19),
+    _(FR_USER_20),
+    _(FR_USER_21),
+    _(FR_USER_22),
+    _(FR_USER_23),
+    _(FR_USER_24),
+    _(FR_USER_25),
+    _(FR_USER_26),
+    _(FR_USER_27),
+    _(FR_USER_28),
+    _(FR_USER_29),
+    _(FR_USER_30),
+    _(FR_USER_31),
+    _(FR_RX_MASTER_SLAVE),
+    _(FR_RB_IO_RX_A_IO_TX_A),
+    _(FR_RB_IO_RX_B_IO_TX_B),
+    _(FR_RB_CAPS),
+    {-1, "<unknown>"}
+#undef _
+  }, *pregs = regs;
+  while (pregs->regno != -1 && pregs->regno != regno) {
+    pregs++;
+  }
+  return pregs->name;
+}
+
 bool
 usrp_basic::_write_fpga_reg (int regno, int value)
 {
   if (d_verbose){
-    fprintf (stdout, "_write_fpga_reg(%3d, 0x%08x)\n", regno, value);
+    fprintf (stdout, "_write_fpga_reg(%3d(%s), 0x%08x)\n",
+      regno, _reg_str(regno), value);
     fflush (stdout);
   }
 
@@ -642,6 +745,10 @@ usrp_basic::_common_write_oe(txrx_t txrx, int which_side, int value, int mask)
   if (! (0 <= which_side && which_side <= 1))
     return false;
 
+  fprintf(stderr, "usrp_basic::_common_write_oe("
+    "txrx=%d, which_side=%d, value=%04x, mask=%04x)\n",
+     txrx, which_side, value, mask);
+
   return _write_fpga_reg(slot_id_to_oe_reg(to_slot(txrx, which_side)),
 			 (mask << 16) | (value & 0xffff));
 }
@@ -652,6 +759,10 @@ usrp_basic::common_write_io(txrx_t txrx, int which_side, int value, int mask)
   if (! (0 <= which_side && which_side <= 1))
     return false;
 
+  fprintf(stderr, "usrp_basic::common_write_io("
+    "txrx=%d, which_side=%d, value=%04x, mask=%04x)\n",
+     txrx, which_side, value, mask);
+
   return _write_fpga_reg(slot_id_to_io_reg(to_slot(txrx, which_side)),
 			 (mask << 16) | (value & 0xffff));
 }
@@ -661,6 +772,9 @@ usrp_basic::common_read_io(txrx_t txrx, int which_side, int *value)
 {
   if (! (0 <= which_side && which_side <= 1))
     return false;
+
+  fprintf(stderr, "usrp_basic::common_read_io(txrx=%d, which_side=%d)\n",
+    txrx, which_side);
 
   int t;
   int reg = which_side + 1;	// FIXME, *very* magic number (fix in serial_io.v)
@@ -830,6 +944,8 @@ static unsigned char rx_fini_regs[] = {
 
 usrp_basic_rx::~usrp_basic_rx ()
 {
+  fprintf(stderr, "usrp_basic_rx::~usrp_basic_rx\n");
+
   if (!set_rx_enable (false)){
     fprintf (stderr, "usrp_basic_rx: set_fpga_rx_enable failed\n");
   }

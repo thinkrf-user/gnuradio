@@ -51,6 +51,7 @@ thinkrf827_base::thinkrf827_base(usrp_basic_sptr _usrp, int which, int _power_on
     @type which: int
   */
 
+  fprintf(stderr, "thinkrf827_base::thinkrf827_base(which=%d)\n", which);
 
   usrp()->_write_oe(d_which, RDFC1_MASK, RDFC1_MASK);
 
@@ -92,6 +93,10 @@ thinkrf827_base::set_freq(double freq)
   t.tv_nsec = 10000000;
   nanosleep(&t, NULL);
 
+  fprintf(stderr,
+    "thinkrf827_base::set_freq(freq=%.03fM) // result: %.03fM (ok=%d)\n",
+    freq/1e6, args.baseband_freq/1e6, args.ok
+  );
   //fprintf(stderr,"Setting WBXNG frequency, requested %d, obtained %f, lock_detect %d\n",
   //        int_freq, freq_result, d_common->_get_locked());
 
@@ -180,7 +185,7 @@ thinkrf827_base_rx::~thinkrf827_base_rx()
 void
 thinkrf827_base_rx::shutdown()
 {
-  // fprintf(stderr, "thinkrf827_base_rx::shutdown  d_is_shutdown = %d\n", d_is_shutdown);
+  fprintf(stderr, "thinkrf827_base_rx::shutdown  d_is_shutdown = %d\n", d_is_shutdown);
 
   if (!d_is_shutdown){
     d_is_shutdown = true;

@@ -234,7 +234,40 @@ class app_top_block(stdgui2.std_top_block):
         hbox.Add((5,0), 0)
         vbox.Add(hbox, 0, wx.EXPAND)
 
+        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         
+        switches = [
+          ("VSWA", 1 << 0),
+          ("VSWB", 1 << 1),
+          ("VSWC", 1 << 2),
+          ("VSWD", 1 << 3),
+          ("FILT_A0", 1 << 4),
+          ("FILT_A1", 1 << 5)
+        ]
+
+        io_reg = self.u.read_io(0)
+        print "MARK io_reg=%04x" % io_reg
+        for index, (label, mask) in enumerate(switches):
+          class SwitchSetter:
+            def __init__(sself, mask):
+              sself.mask = mask
+
+            def setSwitch(sself, value):
+              self.u.write_io(0, bool(value) and sself.mask or 0, sself.mask)
+              io_state = self.u.read_io(0)
+              print "io_state = 0x%04x" % io_state
+
+          myform[label] = form.checkbox_field(
+            parent=panel, sizer=hbox2, label=label,
+            callback=SwitchSetter(mask).setSwitch)
+
+          myform[label].set_value(bool(io_reg & mask))
+
+        hbox2.Add((5,0), 1)
+
+        vbox.Add((0,5), 0)
+        vbox.Add(hbox2, 0, wx.EXPAND)
+
     def set_freq(self, target_freq):
         """
         Set the center frequency we're interested in.
