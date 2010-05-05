@@ -37,11 +37,6 @@
 #define MAX_FREQ DIV_ROUND(MAX_VCO_FREQ, 1)                                           /* upper bound freq (rf div = 1) */
 #define MIN_FREQ DIV_ROUND(MIN_VCO_FREQ, MAX_RF_DIV)                    /* calculated lower bound freq */
 
-#define CE_PIN        (1 << 3)
-#define PDB_RF_PIN    (1 << 2)
-#define MUX_PIN       (1 << 1)
-#define LD_PIN        (1 << 0)
-
 adf4350::adf4350(usrp_basic_sptr _usrp, int _which, int _spi_enable)
 {
     /* Initialize the pin directions. */
@@ -52,10 +47,6 @@ adf4350::adf4350(usrp_basic_sptr _usrp, int _which, int _spi_enable)
     d_spi_format = SPI_FMT_MSB | SPI_FMT_HDR_0;
 
     d_regs = new adf4350_regs(this);
-
-    /* Outputs */
-    d_usrp->_write_oe(d_which, (CE_PIN | PDB_RF_PIN), (CE_PIN | PDB_RF_PIN));
-    d_usrp->write_io(d_which, (CE_PIN), (CE_PIN | PDB_RF_PIN));
 
     /* Initialize the pin levels. */
     _enable(true);
@@ -70,7 +61,6 @@ adf4350::adf4350(usrp_basic_sptr _usrp, int _which, int _spi_enable)
 
 adf4350::~adf4350()
 {
-    d_usrp->write_io(d_which, (0), (CE_PIN | PDB_RF_PIN));
     delete d_regs;
 }
 
@@ -89,17 +79,13 @@ adf4350::_get_min_freq(void)
 bool
 adf4350::_get_locked(void)
 {
-    return d_usrp->read_io(d_which) & LD_PIN;
+    return true; // not wired on the WSA1000
 }
 
 void
 adf4350::_enable(bool enable)
 {
-    if (enable){ /* chip enable */
-        d_usrp->write_io(d_which, (PDB_RF_PIN), (PDB_RF_PIN));
-    }else{
-        d_usrp->write_io(d_which, 0, (PDB_RF_PIN));
-    }
+    return;
 }
 
 void

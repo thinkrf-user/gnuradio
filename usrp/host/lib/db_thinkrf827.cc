@@ -40,6 +40,7 @@
 #define RFDC1_VSWD      (1 << 3)  // LED1
 #define RFDC1_FILTER_A0 (1 << 4)
 #define RFDC1_FILTER_A1 (1 << 5)
+#define RDFC1_MASK      ((1 << 6) - 1)
 
 thinkrf827_base::thinkrf827_base(usrp_basic_sptr _usrp, int which, int _power_on)
   : db_base(_usrp, which), d_power_on(_power_on), d_common(NULL)
@@ -50,14 +51,19 @@ thinkrf827_base::thinkrf827_base(usrp_basic_sptr _usrp, int which, int _power_on
     @type which: int
   */
 
-  usrp()->_write_oe(d_which, 0, 0xffff);   // turn off all outputs
+
+  usrp()->_write_oe(d_which, RDFC1_MASK, RDFC1_MASK);
+
+  usrp()->write_io(d_which,
+    RFDC1_VSWA | // +22 dB
+    RFDC1_VSWB | // +22 dB
+    RFDC1_VSWC | // +22 dB
+    RFDC1_VSWD | // LED
+    RFDC1_FILTER_A0 | RFDC1_FILTER_A1, // 45.1 MHz
+    0xffff);
 
   d_first = true;
   d_spi_format = SPI_FMT_MSB | SPI_FMT_HDR_0;
-
-  _enable_refclk(false);                // disable refclk
-
-  set_auto_tr(false);
 }
 
 thinkrf827_base::~thinkrf827_base()
@@ -157,8 +163,7 @@ thinkrf827_base_rx::thinkrf827_base_rx(usrp_basic_sptr _usrp, int which, int _po
   //usrp()->_write_oe(d_which, ?, ?);
   //usrp()->write_io(d_which,  ?, ?);
 
-  // set up for RX on TX/RX port
-  select_rx_antenna("TX/RX");
+  select_rx_antenna("J1");
 
   bypass_adc_buffers(true);
 
@@ -187,16 +192,7 @@ thinkrf827_base_rx::shutdown()
     // fprintf(stderr, "thinkrf827_base_rx::shutdown  before _write_control\n");
     //_write_control(_compute_control_reg());
 
-    // fprintf(stderr, "thinkrf827_base_rx::shutdown  before _enable_refclk\n");
-    _enable_refclk(false);                       // turn off refclk
-
-    // fprintf(stderr, "thinkrf827_base_rx::shutdown  before set_auto_tr\n");
-    set_auto_tr(false);
-
-    // Power down
-    //usrp()->write_io(d_which, ?, ?);
-
-    // fprintf(stderr, "thinkrf827_base_rx::shutdown  after set_auto_tr\n");
+    usrp()->write_io(d_which, 0, RFDC1_VSWD);
   }
 }
 
