@@ -61,9 +61,9 @@ thinkrf827_base::thinkrf827_base(usrp_basic_sptr _usrp, int which, int _power_on
   usrp()->write_io(d_which,
     RFDC1_VSWA | // +22 dB
     RFDC1_VSWB | // +22 dB
-    RFDC1_VSWC | // +22 dB
+    //RFDC1_VSWC | // -20 dB
     RFDC1_VSWD | // LED
-    RFDC1_FILTER_A0 | RFDC1_FILTER_A1, // 45.1 MHz
+    RFDC1_FILTER_A1 /*| RFDC1_FILTER_A0*/,
     0xffff);
 
   d_first = true;

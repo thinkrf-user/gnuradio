@@ -241,8 +241,8 @@ class app_top_block(stdgui2.std_top_block):
           ("VSWB", 1 << 1),
           ("VSWC", 1 << 2),
           ("VSWD", 1 << 3),
+          ("FILT_A1", 1 << 5),
           ("FILT_A0", 1 << 4),
-          ("FILT_A1", 1 << 5)
         ]
 
         io_reg = self.u.read_io(0)
