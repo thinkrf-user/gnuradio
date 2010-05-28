@@ -32,7 +32,7 @@
 	.module usb_descriptors
 	
 	VID_FREE	 = 0xfffe	; Free Software Folks
-	PID_USRP	 = 0x0002	; USRP
+	PID_THINKRF	 = 0x0015	; ThinkRF WSA1000 (temporary)
 
 	;; We distinguish configured from unconfigured USRPs using the Device ID.
 	;; If the MSB of the DID is 0, the device is unconfigured.
@@ -97,8 +97,8 @@ _high_speed_device_descr::
 	.db	64		; bMaxPacketSize0 for endpoint 0
 	.db	<VID_FREE	; idVendor
 	.db	>VID_FREE	; idVendor
-	.db	<PID_USRP	; idProduct
-	.db	>PID_USRP	; idProduct
+	.db	<PID_THINKRF	; idProduct
+	.db	>PID_THINKRF	; idProduct
 _usb_desc_hw_rev_binary_patch_location_0::
 	.db	<DID_USRP	; bcdDevice
 	.db	>DID_USRP	; bcdDevice
@@ -207,8 +207,8 @@ _full_speed_device_descr::
 	.db	64		; bMaxPacketSize0 for endpoint 0
 	.db	<VID_FREE	; idVendor
 	.db	>VID_FREE	; idVendor
-	.db	<PID_USRP	; idProduct
-	.db	>PID_USRP	; idProduct
+	.db	<PID_THINKRF	; idProduct
+	.db	>PID_THINKRF	; idProduct
 _usb_desc_hw_rev_binary_patch_location_1::
 	.db	<DID_USRP	; bcdDevice
 	.db	>DID_USRP	; bcdDevice

@@ -244,9 +244,10 @@ isr_tick (void) interrupt
 void
 patch_usb_descriptors(void)
 {
-  usb_desc_hw_rev_binary_patch_location_0[0] = 5;
-  usb_desc_hw_rev_binary_patch_location_1[0] = 5;
-  usb_desc_hw_rev_ascii_patch_location_0[0] = '5';
+  const int wsa1000_usrp_rev = 4;
+  usb_desc_hw_rev_binary_patch_location_0[0] = wsa1000_usrp_rev;
+  usb_desc_hw_rev_binary_patch_location_1[0] = wsa1000_usrp_rev;
+  usb_desc_hw_rev_ascii_patch_location_0[0] = '0' + wsa1000_usrp_rev;
 }
 
 void

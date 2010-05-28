@@ -129,7 +129,7 @@ usrp_usrp_p (libusb_device *q)
 {
   libusb_device_descriptor desc = _get_usb_device_descriptor(q);
   return (desc.idVendor == USB_VID_FSF
-          && desc.idProduct == USB_PID_FSF_USRP);
+          && desc.idProduct == USB_PID_FSF_THINKRF);
 }
 
 bool
@@ -623,8 +623,7 @@ usrp_load_fpga (libusb_device_handle *udh,
 static libusb_device_handle *
 open_nth_cmd_interface (int nth, libusb_context *ctx)
 {
-
-  libusb_device *udev = usrp_find_device (nth, true, ctx);
+  libusb_device *udev = usrp_find_device (nth, false, ctx);
   if (udev == 0){
     fprintf (stderr, "usrp: failed to find usrp[%d]\n", nth);
     return 0;
@@ -748,23 +747,12 @@ usrp_load_standard_bits (int nth, bool force,
 
   // first, figure out what hardware rev we're dealing with
   {
-    libusb_device *udev = usrp_find_device (nth, true, ctx);
+    libusb_device *udev = usrp_find_device (nth, false, ctx);
     if (udev == 0){
       fprintf (stderr, "usrp: failed to find usrp[%d]\n", nth);
       return false;
     }
     hw_rev = usrp_hw_rev (udev);
-
-    // ThinkRF WSA1000:
-    //
-    // When booting from EEPROM, looks like a generic Cypress FX2 with
-    // hw_rev = 0. We want find_file to look in $USRP_ROOT/rev5 for std.ihx.
-    //
-    // After loading the firmware, the USB descriptors make it look like a true
-    // USRP1 rev5.
-    if (usrp_fx2_p(udev) && hw_rev == 0) {
-      hw_rev = 5;
-    }
   }
 
   // start by loading the firmware
