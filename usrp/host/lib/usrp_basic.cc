@@ -1105,7 +1105,7 @@ usrp_basic_rx::probe_rx_slots (bool verbose)
   static const char *slot_name[2] = { "RX d'board A", "RX d'board B" };
 
   // TODO: automatically detect daughterboard
-  d_dbid[0] = USRP_DBID_THINKRF_827_RX;
+  d_dbid[0] = USRP_DBID_THINKRF_440_RX;
   d_dbid[1] = -1; // none
 
   for (int i = 0; i < 2; i++){

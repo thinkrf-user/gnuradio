@@ -37,13 +37,11 @@
 #include <stdio.h>
 
 // d'board i/o pin defs
-#define RFDC1_VSWA      (1 << 0)
-#define RFDC1_VSWB      (1 << 1)
-#define RFDC1_VSWC      (1 << 2)
-#define RFDC1_VSWD      (1 << 3)  // LED1
-#define RFDC1_FILTER_A0 (1 << 4)
-#define RFDC1_FILTER_A1 (1 << 5)
-#define RDFC1_MASK      ((1 << 6) - 1)
+#define RFE0440_FREQ    (1 << 0)  // (VSWA) unused
+#define RFE0440_RFGB    (1 << 1)  // (VSWB)
+#define RFE0440_RFGA    (1 << 2)  // (VSWC)
+                                  // (VSWD) unused
+#define RFE0440_MASK    ((1 << 3) - 1)
 
 thinkrf440_base::thinkrf440_base(usrp_basic_sptr _usrp, int which, int _power_on)
   : db_base(_usrp, which), d_power_on(_power_on), d_common(NULL)
@@ -56,14 +54,11 @@ thinkrf440_base::thinkrf440_base(usrp_basic_sptr _usrp, int which, int _power_on
 
   fprintf(stderr, "thinkrf440_base::thinkrf440_base(which=%d)\n", which);
 
-  usrp()->_write_oe(d_which, RDFC1_MASK, RDFC1_MASK);
+  usrp()->_write_oe(d_which, RFE0440_MASK, RFE0440_MASK);
 
   usrp()->write_io(d_which,
-    RFDC1_VSWA | // +22 dB
-    RFDC1_VSWB | // +22 dB
-    RFDC1_VSWC | // +22 dB
-    RFDC1_VSWD | // LED
-    RFDC1_FILTER_A0 | RFDC1_FILTER_A1, // 45.1 MHz
+    RFE0440_RFGA
+    /* | RFE0440_RFGB */,
     0xffff);
 
   d_first = true;
@@ -199,8 +194,6 @@ thinkrf440_base_rx::shutdown()
 
     // fprintf(stderr, "thinkrf440_base_rx::shutdown  before _write_control\n");
     //_write_control(_compute_control_reg());
-
-    usrp()->write_io(d_which, 0, RFDC1_VSWD);
   }
 }
 
@@ -298,5 +291,5 @@ db_thinkrf440_rx::gain_db_per_step()
 bool
 db_thinkrf440_rx::i_and_q_swapped()
 {
-  return false;
+  return true;
 }
