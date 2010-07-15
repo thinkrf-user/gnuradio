@@ -84,7 +84,7 @@ ServiceBinary  = %12%\libusb0.sys
 ;--------------------------------------------------------------------------
 
 [Devices]
-"USRP filter"=LIBUSB_DEV, USB\VID_fffe&PID_0002
+"USRP filter"=LIBUSB_DEV, USB\VID_fffe&PID_0015
 
 [Strings]
 manufacturer = "GNU Radio folks"
