@@ -42,6 +42,8 @@ public:
     freq_t _get_max_freq();
     freq_t _get_min_freq();
 
+    void set_muxout(enum adf4350_regs::muxout_options muxout);
+
 protected:
     usrp_basic_sptr d_usrp;
     int d_which;

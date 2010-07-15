@@ -28,7 +28,6 @@
 const uint16_t adf4350_regs::s_phase = 0;
 /* reg 2 */
 const uint8_t adf4350_regs::s_low_noise_and_low_spur_modes = 0;
-const uint8_t adf4350_regs::s_muxout = 6;
 const uint8_t adf4350_regs::s_reference_doubler = 0;
 const uint8_t adf4350_regs::s_rdiv2 = 0;
 const uint8_t adf4350_regs::s_double_buff = 0;
@@ -65,6 +64,7 @@ adf4350_regs::adf4350_regs(adf4350* _adf4350){
     d_prescaler = uint8_t(0);
     d_mod = uint16_t(0xfff);                      /* max fractional accuracy */
     /* reg 2 */
+    d_muxout = muxout_lock_detect;
     d_10_bit_r_counter = uint16_t(2);
     /* reg 3 */
     /* reg 4 */
@@ -94,7 +94,7 @@ adf4350_regs::_load_register(uint8_t addr){
 			_reg_shift(d_mod, 3)); break;
 		case 2: data = (
 			_reg_shift(s_low_noise_and_low_spur_modes, 29)  |
-			_reg_shift(s_muxout, 26)                        |
+			_reg_shift(d_muxout, 26)                        |
 			_reg_shift(s_reference_doubler, 25)             |
 			_reg_shift(s_rdiv2, 24)                         |
 			_reg_shift(d_10_bit_r_counter, 14)              |

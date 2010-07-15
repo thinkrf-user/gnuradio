@@ -46,7 +46,17 @@ public:
     uint16_t d_mod;
     /* reg 2 */
     static const uint8_t s_low_noise_and_low_spur_modes;
-    static const uint8_t s_muxout;
+    enum muxout_options {
+        muxout_three_state = 0,
+        muxout_high,
+        muxout_low,
+        muxout_r_divider,
+        muxout_n_divider,
+        muxout_analog_detect,
+        muxout_lock_detect,
+        muxout_reserved
+    };
+    uint8_t d_muxout;
     static const uint8_t s_reference_doubler;
     static const uint8_t s_rdiv2;
     uint16_t d_10_bit_r_counter;

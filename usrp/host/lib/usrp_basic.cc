@@ -39,6 +39,9 @@
 #include <ad9640.h>
 #include <string.h>
 #include <cstdio>
+#include <usrp_spi_defs.h>
+#include "db_wbxng_adf4350.h"
+#include "db_wbxng_adf4350_regs.h"
 
 using namespace ad9862;
 
@@ -1107,13 +1110,56 @@ usrp_basic_rx::restore_rx (bool on)
     set_rx_enable (on);
 }
 
+struct nop_deleter {
+  void operator()(usrp_basic *ptr) {}
+};
+
+int
+usrp_basic_rx::wsa1000_detect_daughterboard()
+{
+  // J4 RFVCO_MUXOUT is routed to RX A I/O bit 6.
+  //
+  // On the 827 db, RFVCO_MUXOUT is unconnected and reads as an arbitrary value
+  // depending on the charge on the CPLD's input capacitance.
+  // On the 440 db, RFVCO_MUXOUT is driven by the VCO's MUXOUT, which
+  // can be configured to drive the line high or low.
+  //
+  // We cannot currently detect (and do not support) an 827 with on-board VCO,
+  // nor a missing db, nor other dbs than the ones mentioned.
+  //
+  // TODO: Use EEPROM for this.
+  static const int IO_RFVCO_MUXOUT = 1 << 6;
+
+  _write_oe(0, 0, IO_RFVCO_MUXOUT);
+
+  usrp_basic_sptr this_sptr(
+    this,
+    // We get called from this class' constructor so our refcount going in is 0.
+    // Prevent shared_ptr from deleting the object when this function returns.
+    nop_deleter()
+  );
+
+  boost::shared_ptr<adf4350> vco(new adf4350(this_sptr, 0, SPI_ENABLE_VCO));
+
+  vco->set_muxout(adf4350_regs::muxout_high);
+  int muxout_high = !!(read_io(0) & IO_RFVCO_MUXOUT);
+
+  vco->set_muxout(adf4350_regs::muxout_low);
+  int muxout_low = !!(read_io(0) & IO_RFVCO_MUXOUT);
+
+  if (muxout_high == 1 && muxout_low == 0) {
+    return USRP_DBID_THINKRF_440_RX;
+  } else {
+    return USRP_DBID_THINKRF_827_RX;
+  }
+}
+
 void
 usrp_basic_rx::probe_rx_slots (bool verbose)
 {
   static const char *slot_name[2] = { "RX d'board A", "RX d'board B" };
 
-  // TODO: automatically detect daughterboard
-  d_dbid[0] = USRP_DBID_THINKRF_440_RX;
+  d_dbid[0] = wsa1000_detect_daughterboard();
   d_dbid[1] = -1; // none
 
   for (int i = 0; i < 2; i++){

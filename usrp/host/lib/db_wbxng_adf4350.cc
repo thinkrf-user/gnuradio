@@ -190,3 +190,10 @@ adf4350::_get_freq(void)
     temp /= (1 << d_regs->d_divider_select);
     return temp;
 }
+
+void
+adf4350::set_muxout(enum adf4350_regs::muxout_options muxout)
+{
+    d_regs->d_muxout = muxout;
+    d_regs->_load_register(2);
+}

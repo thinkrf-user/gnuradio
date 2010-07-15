@@ -801,6 +801,7 @@ protected:
   void restore_rx (bool on);	// conditional set
 
   void probe_rx_slots (bool verbose);
+  int wsa1000_detect_daughterboard();
 
 public:
   ~usrp_basic_rx ();
