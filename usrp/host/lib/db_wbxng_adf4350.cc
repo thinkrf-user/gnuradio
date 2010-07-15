@@ -27,7 +27,7 @@
 #include <stdio.h>
 
 #define FREQ_C(freq) uint64_t(freq)
-#define INPUT_REF_FREQ FREQ_C(50e6)
+#define INPUT_REF_FREQ FREQ_C(100e6)
 #define DIV_ROUND(num, denom) (((num) + ((denom)/2))/(denom))
 #define INPUT_REF_FREQ_2X (2*INPUT_REF_FREQ)                            /* input ref freq with doubler turned on */
 #define MIN_INT_DIV uint16_t(23)                                        /* minimum int divider, prescaler 4/5 only */

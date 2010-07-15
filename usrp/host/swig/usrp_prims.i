@@ -192,6 +192,10 @@ bool usrp_9862_write (libusb_device_handle *udh,
 		      int regno,			// [0, 63]
 		      int value);			// [0, 255]	
 
+bool usrp_9640_write (libusb_device_handle *udh,
+		      int regno,			// [0, 8191]
+		      int value);			// [0, 255]
+
 %inline %{
 
 int 

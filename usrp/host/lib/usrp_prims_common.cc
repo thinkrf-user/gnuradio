@@ -854,6 +854,24 @@ usrp_spi_read (libusb_device_handle *udh,
 }
 
 bool
+usrp_9640_write (libusb_device_handle *udh,
+		 int regno, int value)
+{
+  if (1)
+    fprintf (stderr, "usrp_9640_write reg = 0x%02x, val = %3d (0x%02x)\n",
+	     regno, value, value);
+
+  unsigned char buf[1];
+
+  buf[0] = value;
+
+  return usrp_spi_write (udh, 0x00 | (regno & 0x1fff),
+			 SPI_ENABLE_CODEC,
+			 SPI_FMT_MSB | SPI_FMT_HDR_2,
+			 buf, 1);
+}
+
+bool
 usrp_9862_write (libusb_device_handle *udh, int which_codec,
 		 int regno, int value)
 {

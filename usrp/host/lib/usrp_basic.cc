@@ -150,6 +150,15 @@ usrp_basic::usrp_basic (int which_board,
     throw std::runtime_error ("usrp_basic/init_9862");
   }
 
+  // Divide 100 MHz clock by two for ADC and FPGA.
+  static const int REG_CLOCK_DIVIDE = 0x0b;
+  static const int REG_DEVICE_UPDATE = 0xff;
+  if (!usrp_9640_write (d_udh, REG_CLOCK_DIVIDE, 1) ||
+      !usrp_9640_write (d_udh, REG_DEVICE_UPDATE, 1)) {
+    fprintf (stderr, "usrp_basic: failed to init 9640 regs\n");
+    throw std::runtime_error ("usrp_basic/init_9640");
+  }
+
   _write_fpga_reg (FR_MODE, 0);		// ensure we're in normal mode
   _write_fpga_reg (FR_DEBUG_EN, 0);	// disable debug outputs
 
