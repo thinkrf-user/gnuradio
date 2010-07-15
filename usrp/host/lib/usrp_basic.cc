@@ -36,6 +36,7 @@
 #include <assert.h>
 #include <math.h>
 #include <ad9862.h>
+#include <ad9640.h>
 #include <string.h>
 #include <cstdio>
 
@@ -151,10 +152,8 @@ usrp_basic::usrp_basic (int which_board,
   }
 
   // Divide 100 MHz clock by two for ADC and FPGA.
-  static const int REG_CLOCK_DIVIDE = 0x0b;
-  static const int REG_DEVICE_UPDATE = 0xff;
-  if (!usrp_9640_write (d_udh, REG_CLOCK_DIVIDE, 1) ||
-      !usrp_9640_write (d_udh, REG_DEVICE_UPDATE, 1)) {
+  if (!usrp_9640_write (d_udh, ad9640::REG_CLOCK_DIVIDE, 1) ||
+      !usrp_9640_write (d_udh, ad9640::REG_DEVICE_UPDATE, ad9640::DEVICE_UPDATE_TRANSFER)) {
     fprintf (stderr, "usrp_basic: failed to init 9640 regs\n");
     throw std::runtime_error ("usrp_basic/init_9640");
   }

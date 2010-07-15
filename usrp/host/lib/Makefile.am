@@ -161,6 +161,7 @@ endif
 
 noinst_HEADERS =			\
 	ad9862.h			\
+	ad9640.h			\
 	db_base_impl.h			\
 	db_boards.h			\
 	db_util.h			\
