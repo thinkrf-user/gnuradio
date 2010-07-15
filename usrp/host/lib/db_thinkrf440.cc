@@ -41,7 +41,9 @@
 #define RFE0440_RFGB    (1 << 1)  // (VSWB)
 #define RFE0440_RFGA    (1 << 2)  // (VSWC)
                                   // (VSWD) unused
-#define RFE0440_MASK    ((1 << 3) - 1)
+                                  // (FILTER_A0) unused
+                                  // (FILTER_A1) unused
+#define RFE0440_MASK    ((1 << 6) - 1)
 
 thinkrf440_base::thinkrf440_base(usrp_basic_sptr _usrp, int which, int _power_on)
   : db_base(_usrp, which), d_power_on(_power_on), d_common(NULL)
