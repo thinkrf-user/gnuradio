@@ -388,12 +388,14 @@ usrp_basic::set_dc_offset_cl_enable(int bits, int mask)
 
 // ----------------------------------------------------------------
 
+struct reg_name {
+  int regno;
+  const char name[23];
+};
+
 static const char *_reg_str(int regno)
 {
-  const struct {
-    int regno;
-    const char name[23];
-  } regs[] = {
+ static const reg_name regs[] = {
 #define _(r) {r, #r}
     _(FR_TX_SAMPLE_RATE_DIV),
     _(FR_RX_SAMPLE_RATE_DIV),
@@ -483,7 +485,8 @@ static const char *_reg_str(int regno)
     _(FR_RB_CAPS),
     {-1, "<unknown>"}
 #undef _
-  }, *pregs = regs;
+  };
+  const reg_name *pregs = regs;
   while (pregs->regno != -1 && pregs->regno != regno) {
     pregs++;
   }
