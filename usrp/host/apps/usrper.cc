@@ -69,6 +69,7 @@ usage ()
   fprintf (stderr, "  %s 9862b_write regno value\n", prog_name);
   fprintf (stderr, "  %s 9862a_read regno\n", prog_name);
   fprintf (stderr, "  %s 9862b_read regno\n", prog_name);
+  fprintf (stderr, "  %s 9640_write regno value\n", prog_name);
   exit (1);
 }
 
@@ -343,6 +344,12 @@ main (int argc, char **argv)
       chk_result (0);
     }
     fprintf (stdout, "reg[%d] = 0x%02x\n", regno, value);
+  }
+  else if (strcmp (cmd, "9640_write") == 0){
+    CHKARGS (2);
+    int regno = strtol (argv[optind], 0, 0);
+    int value = strtol (argv[optind+1], 0, 0);
+    chk_result (usrp_9640_write (udh, regno, value));
   }
   else {
     usage ();
