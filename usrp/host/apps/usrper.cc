@@ -135,7 +135,8 @@ static void
 chk_result (bool ok)
 {
   if (!ok){
-    fprintf (stderr, "%s: failed\n", prog_name);
+    fprintf (stderr, "%s: failed, errno=%d, errstr=%s\n",
+      prog_name, errno, strerror(errno));
     exit (1);
   }
 }
