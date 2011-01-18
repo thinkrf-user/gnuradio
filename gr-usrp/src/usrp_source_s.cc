@@ -126,6 +126,10 @@ usrp_source_s::copy_from_usrp_buffer (gr_vector_void_star &output_items,
     assert(0);
   }
 
+  if (iq_correct_enabled()) {
+    iq_correct<short>(out, nitems);
+  }
+
   output_items_produced = nitems;
   bytes_read = nitems * nusrp_bytes_per_item;
 }

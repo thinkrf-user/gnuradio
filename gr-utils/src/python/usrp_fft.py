@@ -267,6 +267,17 @@ class app_top_block(stdgui2.std_top_block):
 
         vbox.Add((0,5), 0)
         vbox.Add(hbox2, 0, wx.EXPAND)
+        
+        hbox3 = wx.BoxSizer(wx.HORIZONTAL)
+        myform["I/Q offset correction"] = form.checkbox_field(
+          parent=panel, sizer=hbox3, label="I/Q offset correction",
+          callback=self.u.set_iq_correct_enabled)
+        myform["I/Q offset correction"].set_value(bool(self.u.iq_correct_enabled()))
+        
+        hbox3.Add((5,0), 1)
+        
+        vbox.Add((0,5), 0)
+        vbox.Add(hbox3, 0, wx.EXPAND)
 
     def set_freq(self, target_freq):
         """

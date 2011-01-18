@@ -50,6 +50,8 @@ public:
   bool has_tx_halfband();
   int nddcs();
   int nducs();
+  void set_iq_correct_enabled(bool enable);
+  bool iq_correct_enabled();
   bool set_format(unsigned int format);
   static unsigned int make_format(int width=16, int shift=0,
 				  bool want_q=true, bool bypass_halfband=false);

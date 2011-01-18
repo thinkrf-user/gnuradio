@@ -47,7 +47,8 @@ usrp_source_base::usrp_source_base (const std::string &name,
   : usrp_base(name,
 	      gr_make_io_signature (0, 0, 0),
 	      output_signature),
-    d_noverruns (0)
+    d_noverruns (0),
+    d_iq_correct_enabled (true)
 {
   d_usrp = usrp_standard_rx::make (which_board, decim_rate,
 				   nchan, mux, mode,

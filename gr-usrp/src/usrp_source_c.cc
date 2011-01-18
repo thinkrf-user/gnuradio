@@ -126,6 +126,12 @@ usrp_source_c::copy_from_usrp_buffer (gr_vector_void_star &output_items,
     assert(0);
   }
 
+  /* make sure complex<float> is just a float[2] */
+  BOOST_STATIC_ASSERT(sizeof(gr_complex) == 2 * sizeof(float));
+  if (iq_correct_enabled()) {
+    iq_correct<float>(static_cast<float *>(&out[0].real()), nitems);
+  }
+
   output_items_produced = nitems;
   bytes_read = nitems * nusrp_bytes_per_item;
 }

@@ -27,6 +27,7 @@
 #include <stdexcept>
 #include <usrp/usrp_tune_result.h>
 #include <usrp/usrp_dbid.h>
+#include <stdio.h>
 
 class usrp_standard_rx;
 
@@ -37,6 +38,7 @@ class usrp_source_base : public usrp_base {
  private:
   boost::shared_ptr<usrp_standard_rx>	d_usrp;
   int			 d_noverruns;
+  bool     d_iq_correct_enabled;
   
  protected:
   usrp_source_base (const std::string &name,
@@ -83,6 +85,10 @@ class usrp_source_base : public usrp_base {
 				      const void *usrp_buffer,
 				      int usrp_buffer_length,
 				      int &bytes_read) = 0;
+
+  /* type-agnostic template implementation */
+  template <typename T>
+  static void iq_correct(T *data, int nsamples);
 
  public:
   ~usrp_source_base ();
@@ -138,6 +144,9 @@ class usrp_source_base : public usrp_base {
   bool has_tx_halfband();
   int nddcs();
   int nducs();
+  
+  void set_iq_correct_enabled(bool enable) { d_iq_correct_enabled = enable; }
+  bool iq_correct_enabled() const { return d_iq_correct_enabled; }
 
   /*!
    * \brief Called to enable drivers, etc for i/o devices.
@@ -216,5 +225,46 @@ class usrp_source_base : public usrp_base {
    */
   usrp_subdev_spec pick_rx_subdevice();
 };
+
+/* source needs to be in a header file so that source_[cs] can specialize to
+   their type */
+template <typename T>
+void usrp_source_base::iq_correct(T *data, int nsamples) {
+  assert((nsamples % 512) == 0);
+  printf("iq_correct: %d samples (%d x 512)\n", nsamples, nsamples/512);
+  while (nsamples) {
+    // TODO: simplify this to avoid trig
+    // TODO: do as much as possible in the native type (avoid conversion to
+    // float and back)
+    const size_t length = 512;
+    float cI = 0, cQ = 0, p = 0;
+    for (size_t index = 0; index < length; index++) {
+      const float I = (float)data[2 * index + 0],
+                  Q = (float)data[2 * index + 1];
+      cI += I * I;
+      cQ += Q * Q;
+      p += I * Q;
+    }
+    const float amp = sqrt(2 * cI / length);
+    const float ratio = sqrt(cI / cQ);
+    
+    // from here on, I=I/amp, Q=Q/amp
+    p = p * ratio / (amp * amp);
+    const float sinphi = 2 * p / length;
+    const float phi_est = -asin(sinphi);
+    
+    printf("  phi_est: %7.03f rad (%5.01f deg)\n", phi_est, 180*phi_est/M_PI);
+    
+    for (size_t index = 0; index < length; index++) {
+      float I = (float)data[2 * index + 0];
+      float Q = (float)data[2 * index + 1];
+      Q = (sin(phi_est)*I + (ratio)*Q)/cos(phi_est);
+      data[2 * index + 1] = (T)Q;
+    }
+    
+    data += length * 2;
+    nsamples -= length;
+  }
+}
 
 #endif /* INCLUDED_USRP_SOURCE_BASE_H */
