@@ -33,6 +33,8 @@
 
 #include "usrp/usrp_prims.h"
 #include "usrp_spi_defs.h"
+#include "fpga_regs_common.h"
+#include "fpga_regs_standard.h"
 
 char *prog_name;
 
@@ -70,6 +72,9 @@ usage ()
   fprintf (stderr, "  %s 9862a_read regno\n", prog_name);
   fprintf (stderr, "  %s 9862b_read regno\n", prog_name);
   fprintf (stderr, "  %s 9640_write regno value\n", prog_name);
+  fprintf (stderr, "  %s rfio_write_oe {vswa|vswb|vswc|vswd|filter_a0|filter_a1} {input|output}\n", prog_name);
+  fprintf (stderr, "  %s rfio_write_io {vswa|vswb|vswc|vswd|filter_a0|filter_a1} {on|off}\n", prog_name);
+  fprintf (stderr, "  %s rfio_read\n", prog_name);
   exit (1);
 }
 
@@ -155,6 +160,62 @@ get_on_off (const char *s)
   return false;
 }
 
+// Defines a daughtercard interface pin on the WSA1000U
+struct rfio_signal {
+  const char name[15];
+  unsigned int bit;
+  bool read_only; // VCO_MUXOUT can only be read
+};
+
+const unsigned int signals_end_of_list = -1;
+
+static const rfio_signal rfio_signals[] = {
+  {"VSWA", 0, false},
+  {"VSWB", 1, false},
+  {"VSWC", 2, false},
+  {"VSWD", 3, false},
+  {"FILTER_A0", 4, false},
+  {"FILTER_A1", 5, false},
+  {"VCO_MUXOUT", 6, true},
+  {"", signals_end_of_list, false}
+};
+
+static const rfio_signal *rfio_by_name(const char *name) {
+  const rfio_signal *p = rfio_signals;
+  while (strcasecmp(name, p->name) && p->bit != signals_end_of_list) {
+    p++;
+  }
+  if (p->bit == signals_end_of_list) {
+    return NULL;
+  } else {
+    return p;
+  }
+}
+
+static const char *rfio_writable_names() {
+  static char buffer[256];
+
+  strcpy(buffer, "");
+
+  for (const rfio_signal *sig = rfio_signals;
+       sig->bit != signals_end_of_list;
+       sig++) {
+    if (!sig->read_only) {
+      strncat(buffer, sig->name, sizeof(buffer) - 1);
+      strncat(buffer, " ", sizeof(buffer) - 1);
+    }
+  }
+  return buffer;
+}
+
+static void rfio_show_bits(unsigned int data) {
+  for (const rfio_signal *sig = rfio_signals;
+       sig->bit != signals_end_of_list;
+       sig++) {
+    bool state = !!(data & (1 << sig->bit));
+    printf("%12s %s\n", sig->name, state ? "on" : "off");
+  }
+}
 
 int
 main (int argc, char **argv)
@@ -350,6 +411,83 @@ main (int argc, char **argv)
     int regno = strtol (argv[optind], 0, 0);
     int value = strtol (argv[optind+1], 0, 0);
     chk_result (usrp_9640_write (udh, regno, value));
+  }
+  else if (strcmp (cmd, "rfio_write_oe") == 0){
+    CHKARGS (2);
+    const rfio_signal *sig = rfio_by_name(argv[optind]);
+    if (sig == NULL) {
+      fprintf(stderr, "%s: invalid rfio, options are: %s\n",
+        prog_name, rfio_writable_names());
+      exit(1);
+    }
+
+    if (sig->read_only) {
+      fprintf(stderr, "%s: sorry, this rfio is read-only\n", prog_name);
+      exit(1);
+    }
+
+    int bitvalue;
+    if (!strcasecmp(argv[optind+1], "output")) {
+      bitvalue = 1;
+    } else if (!strcasecmp(argv[optind+1], "input")) {
+      bitvalue = 0;
+    } else {
+      fprintf(stderr, "%s: invalid rfio direction, use \"output\" or \"input\"\n",
+        prog_name);
+      exit(1);
+    }
+
+    int mask = 1 << sig->bit;
+    int value = bitvalue << sig->bit;
+
+    // see firmware/include/fpga_regs_common.h
+    int regvalue = (mask << 16) | (value);
+    fprintf(stdout, "%s: usrp_write_fpga_reg(FR_OE_1, 0x%08x)\n", prog_name, regvalue);
+    chk_result (usrp_write_fpga_reg (udh, FR_OE_1, regvalue));
+  }  else if (strcmp (cmd, "rfio_write_io") == 0){
+    CHKARGS (2);
+    const rfio_signal *sig = rfio_by_name(argv[optind]);
+    if (sig == NULL) {
+      fprintf(stderr, "%s: invalid rfio, options are: %s\n",
+        prog_name, rfio_writable_names());
+      exit(1);
+    }
+    
+    if (sig->read_only) {
+      fprintf(stderr, "%s: sorry, this rfio is read-only\n", prog_name);
+      exit(1);
+    }
+
+    int bitvalue;
+    if (!strcasecmp(argv[optind+1], "on") || !strcmp(argv[optind+1], "1")) {
+      bitvalue = 1;
+    } else if (!strcasecmp(argv[optind+1], "off") || !strcmp(argv[optind+1], "0")) {
+      bitvalue = 0;
+    } else {
+      fprintf(stderr, "%s: invalid rfio value, use \"on\" of \"off\"\n",
+        prog_name);
+      exit(1);
+    }
+
+    int mask = 1 << sig->bit;
+    int value = bitvalue << sig->bit;
+
+    fprintf(stderr, "%s: notice: remember to set the signal "
+      "as an output using rfio_write_oe\n", prog_name);
+
+    // see firmware/include/fpga_regs_common.h
+    int regvalue = (mask << 16) | (value);
+    printf("%s: usrp_write_fpga_reg(FR_IO_1, 0x%08x)\n", prog_name, regvalue);
+    chk_result (usrp_write_fpga_reg (udh, FR_IO_1, regvalue));
+  } else if (strcmp(cmd, "rfio_read") == 0) {
+    CHKARGS (0);
+    int regvalue;
+    chk_result (usrp_read_fpga_reg(udh, FR_RB_IO_RX_A_IO_TX_A, &regvalue));
+    printf("%s: usrp_read_fpga_reg(FR_RB_IO_RX_A_IO_TX_A) = 0x%08x\n", prog_name, regvalue);
+    
+    unsigned int io_1 = (unsigned)regvalue >> 16;
+    printf("io_1: 0x%04x\n", io_1);
+    rfio_show_bits(io_1);
   }
   else {
     usage ();
