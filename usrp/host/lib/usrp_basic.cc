@@ -154,11 +154,29 @@ usrp_basic::usrp_basic (int which_board,
     throw std::runtime_error ("usrp_basic/init_9862");
   }
 
+  // Bring everything back to defaults (test mode etc.)
+  if (!usrp_9640_write (d_udh, ad9640::REG_SPI_PORT, ad9640::SOFT_RESET)) {
+    fprintf (stderr, "usrp_basic: failed to write 9640 soft reset\n");
+    throw std::runtime_error ("usrp_basic/init_9640/soft_reset");
+  }
+  
   // Divide 100 MHz clock by two for ADC and FPGA.
-  if (!usrp_9640_write (d_udh, ad9640::REG_CLOCK_DIVIDE, 1) ||
-      !usrp_9640_write (d_udh, ad9640::REG_DEVICE_UPDATE, ad9640::DEVICE_UPDATE_TRANSFER)) {
-    fprintf (stderr, "usrp_basic: failed to init 9640 regs\n");
-    throw std::runtime_error ("usrp_basic/init_9640");
+  if (!usrp_9640_write (d_udh, ad9640::REG_CLOCK_DIVIDE, 1)) {
+    fprintf (stderr, "usrp_basic: failed to write 9640 clock divide\n");
+    throw std::runtime_error ("usrp_basic/init_9640/clock_divide");
+  }
+
+  // Two's complement output format (both channels)
+  if (!usrp_9640_write (d_udh, ad9640::REG_CHANNEL_INDEX, 3) ||
+      !usrp_9640_write (d_udh, ad9640::REG_OUTPUT_MODE, ad9640::TWOS_COMPLEMENT)) {
+    fprintf (stderr, "usrp_basic: failed to write 9640 output format\n");
+    throw std::runtime_error ("usrp_basic/init_9640/output_format");
+  }
+
+  // Apply settings
+  if (!usrp_9640_write (d_udh, ad9640::REG_DEVICE_UPDATE, ad9640::DEVICE_UPDATE_TRANSFER)) {
+    fprintf (stderr, "usrp_basic: failed to write 9640 device update\n");
+    throw std::runtime_error ("usrp_basic/init_9640/device_update");
   }
 
   _write_fpga_reg (FR_MODE, 0);		// ensure we're in normal mode
