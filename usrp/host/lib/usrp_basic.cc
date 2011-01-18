@@ -1138,6 +1138,7 @@ struct nop_deleter {
 int
 usrp_basic_rx::wsa1000_detect_daughterboard()
 {
+    return USRP_DBID_THINKRF_440_RX;
   // J4 RFVCO_MUXOUT is routed to RX A I/O bit 6.
   //
   // On the 827 db, RFVCO_MUXOUT is unconnected and reads as an arbitrary value

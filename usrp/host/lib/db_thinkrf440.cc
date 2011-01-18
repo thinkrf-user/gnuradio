@@ -87,6 +87,17 @@ thinkrf440_base::set_freq(double freq)
   double freq_result = (double) d_common->_get_freq();
   struct freq_result_t args = {ok, freq_result};
 
+  // if f > 1GHz, FREQ pin goes high
+  if (int_freq > 1000000000) { 
+    fprintf(stderr, "---> Setting FREQ low.\n");
+    usrp()->write_io(d_which, 0xffff, RFE0440_FREQ);
+
+  // f <= 1GHz, FREQ pin goes low
+  } else { 
+    fprintf(stderr, "---> Setting FREQ high.\n");
+    usrp()->write_io(d_which, 0x0000, RFE0440_FREQ);
+  }
+
   /* Wait before reading Lock Detect*/
   timespec t;
   t.tv_sec = 0;
@@ -224,31 +235,35 @@ thinkrf440_base_rx::select_rx_antenna(const std::string &which_antenna)
 bool
 thinkrf440_base_rx::set_gain(float gain)
 {
+  uint16_t gainmask = (RFE0440_RFGA | RFE0440_RFGB);
+  int int_gain = (int) gain;
   /*
-    Set the gain.
+    Set the gain configuration
 
-    @param gain:  gain in decibels
+    @param gain:  gain number to set 1 = high, 2 = med, 3 = low, 4 = ulow
     @returns True/False
   */
 
-  // clamp gain
-  gain = std::max(gain_min(), std::min(gain, gain_max()));
+  // high gain (vswb + vswc)
+  if (int_gain == 1) {
+    usrp()->write_io(d_which, (RFE0440_RFGA | RFE0440_RFGB), gainmask);
 
-  float pga_gain, agc_gain;
+  // med gain (vswc)
+  } else if (int_gain == 2) {
+    usrp()->write_io(d_which, RFE0440_RFGA, gainmask);
 
-  float maxgain = gain_max() - usrp()->pga_max();
-  float mingain = gain_min();
-  if(gain > maxgain) {
-    pga_gain = gain-maxgain;
-    assert(pga_gain <= usrp()->pga_max());
-    agc_gain = maxgain;
+  // low gain (vswb)
+  } else if (int_gain == 3) {
+    usrp()->write_io(d_which, RFE0440_RFGB, gainmask);
+
+  // ulow gain ()
+  } else if (int_gain == 4) {
+    usrp()->write_io(d_which, 0, gainmask);
+
+  // any other value is bad
+  } else { 
+    fprintf(stderr, "error: Bad gain value set! gain = %0.03f\n", gain);
   }
-  else {
-    pga_gain = 0;
-    agc_gain = gain;
-  }
-
-  return _set_attn(maxgain-agc_gain) && _set_pga(int(pga_gain));
 }
 
 bool
