@@ -63,7 +63,7 @@ class app_top_block(stdgui2.std_top_block):
                           help="set fgpa decimation rate to DECIM [default=%default]")
         parser.add_option("-f", "--freq", type="eng_float", default=None,
                           help="set frequency to FREQ", metavar="FREQ")
-        parser.add_option("-g", "--gain", type="eng_float", default=None,
+        parser.add_option("-g", "--gain", type="string", default="Ultralow",
                           help="set gain in dB [default is midpoint]")
         parser.add_option("-W", "--waterfall", action="store_true", default=False,
                           help="Enable waterfall display")
@@ -123,20 +123,19 @@ class app_top_block(stdgui2.std_top_block):
             self.scope = scopesink2.scope_sink_c(panel, sample_rate=input_rate)
         else:
             self.scope = fftsink2.fft_sink_c (panel, fft_size=options.fft_size, sample_rate=input_rate, 
-					      ref_scale=options.ref_scale, ref_level=0.0, y_divs = 10,
-					      avg_alpha=options.avg_alpha)
+                ref_scale=options.ref_scale, ref_level=0.0, y_divs = 10,
+                avg_alpha=options.avg_alpha)
 
         self.connect(self.u, self.scope)
 
         self._build_gui(vbox)
-	self._setup_events()
-	
+        self._setup_events()
+
         # set initial values
 
         if options.gain is None:
-            # if no gain was specified, use the mid-point in dB
-            g = self.subdev.gain_range()
-            options.gain = float(g[0]+g[1])/2
+            # if no gain was specified, use the Low
+            options.gain = "Ultralow"
 
         if options.freq is None:
             # if no freq was specified, use the mid-point
@@ -145,19 +144,22 @@ class app_top_block(stdgui2.std_top_block):
 
         self.set_gain(options.gain)
 
-	if options.antenna is not None:
+        if options.antenna is not None:
             print "Selecting antenna %s" % (options.antenna,)
             self.subdev.select_rx_antenna(options.antenna)
 
         if self.show_debug_info:
             self.myform['decim'].set_value(self.u.decim_rate())
-            self.myform['fs@usb'].set_value(self.u.adc_freq() / self.u.decim_rate())
-            self.myform['dbname'].set_value(self.subdev.name())
-            self.myform['baseband'].set_value(0)
-            self.myform['ddc'].set_value(0)
 
         if not(self.set_freq(options.freq)):
             self._set_status_msg("Failed to set initial frequency")
+
+        # set DC correction to off or on
+        # self.u.set_dc_offset_cl_enable(0x00, 0xff) # off
+        self.u.set_dc_offset_cl_enable(0x0f, 0xff) # on
+
+
+
 
     def _set_status_msg(self, msg):
         self.frame.GetStatusBar().SetStatusText(msg, 0)
@@ -167,6 +169,9 @@ class app_top_block(stdgui2.std_top_block):
         def _form_set_freq(kv):
             return self.set_freq(kv['freq'])
             
+        def _form_set_decim(kv):
+            return self.set_decim(kv['decim'])
+
         vbox.Add(self.scope.win, 10, wx.EXPAND)
         
         # add control area at the bottom
@@ -177,107 +182,45 @@ class app_top_block(stdgui2.std_top_block):
             parent=self.panel, sizer=hbox, label="Center freq", weight=1,
             callback=myform.check_input_and_call(_form_set_freq, self._set_status_msg))
 
-        hbox.Add((5,0), 0, 0)
-        g = self.subdev.gain_range()
-        myform['gain'] = form.slider_field(parent=self.panel, sizer=hbox, label="Gain",
-                                           weight=3,
-                                           min=int(g[0]), max=int(g[1]),
-                                           callback=self.set_gain)
-
-        hbox.Add((5,0), 0, 0)
-        vbox.Add(hbox, 0, wx.EXPAND)
-
-        self._build_subpanel(vbox)
-
-    def _build_subpanel(self, vbox_arg):
-        # build a secondary information panel (sometimes hidden)
-
-        # FIXME figure out how to have this be a subpanel that is always
-        # created, but has its visibility controlled by foo.Show(True/False)
-        
-        def _form_set_decim(kv):
-            return self.set_decim(kv['decim'])
-
-        if not(self.show_debug_info):
-            return
-
-        panel = self.panel
-        vbox = vbox_arg
-        myform = self.myform
-
-        #panel = wx.Panel(self.panel, -1)
-        #vbox = wx.BoxSizer(wx.VERTICAL)
-
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
         hbox.Add((5,0), 0)
 
         myform['decim'] = form.int_field(
-            parent=panel, sizer=hbox, label="Decim",
+            parent=self.panel, sizer=hbox, label="Decim",
             callback=myform.check_input_and_call(_form_set_decim, self._set_status_msg))
-
-        hbox.Add((5,0), 1)
-        myform['fs@usb'] = form.static_float_field(
-            parent=panel, sizer=hbox, label="Fs@USB")
-
-        hbox.Add((5,0), 1)
-        myform['dbname'] = form.static_text_field(
-            parent=panel, sizer=hbox)
-
-        hbox.Add((5,0), 1)
-        myform['baseband'] = form.static_float_field(
-            parent=panel, sizer=hbox, label="Analog BB")
-
-        hbox.Add((5,0), 1)
-        myform['ddc'] = form.static_float_field(
-            parent=panel, sizer=hbox, label="DDC")
 
         hbox.Add((5,0), 0)
         vbox.Add(hbox, 0, wx.EXPAND)
 
-        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-        
-        switches = [
-          ("VSWA", 1 << 0),
-          ("VSWB", 1 << 1),
-          ("VSWC", 1 << 2),
-          ("VSWD", 1 << 3),
-          ("FILT_A1", 1 << 5),
-          ("FILT_A0", 1 << 4),
-        ]
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox.Add((5,0), 0, 0)
+        myform['gain'] = form.radiobox_field(
+          parent=self.panel, 
+          sizer=hbox, 
+          label="Gain",
+          weight=1,
+          choices=["High", "Med", "Low", "Ultralow"],
+          value="Ultralow",
+          callback=self.set_gain
+        )
 
-        io_reg = self.u.read_io(0)
-        print "MARK io_reg=%04x" % io_reg
-        for index, (label, mask) in enumerate(switches):
-          class SwitchSetter:
-            def __init__(sself, mask):
-              sself.mask = mask
-
-            def setSwitch(sself, value):
-              self.u.write_io(0, bool(value) and sself.mask or 0, sself.mask)
-              io_state = self.u.read_io(0)
-              print "io_state = 0x%04x" % io_state
-
-          myform[label] = form.checkbox_field(
-            parent=panel, sizer=hbox2, label=label,
-            callback=SwitchSetter(mask).setSwitch)
-
-          myform[label].set_value(bool(io_reg & mask))
-
-        hbox2.Add((5,0), 1)
+        hbox.Add((5,0), 0, 0)
+        vbox.Add(hbox, 0, wx.EXPAND)
 
         vbox.Add((0,5), 0)
-        vbox.Add(hbox2, 0, wx.EXPAND)
-        
+
         hbox3 = wx.BoxSizer(wx.HORIZONTAL)
-        myform["I/Q offset correction"] = form.checkbox_field(
-          parent=panel, sizer=hbox3, label="I/Q offset correction",
-          callback=self.u.set_iq_correct_enabled)
-        myform["I/Q offset correction"].set_value(bool(self.u.iq_correct_enabled()))
-        
+        #myform["I/Q offset correction"] = form.checkbox_field(
+        #parent=self.panel, sizer=hbox3, label="I/Q offset correction",
+        #callback=self.u.set_iq_correct_enabled)
+        #myform["I/Q offset correction"].set_value(bool(self.u.iq_correct_enabled()))
+
         hbox3.Add((5,0), 1)
-        
+
         vbox.Add((0,5), 0)
         vbox.Add(hbox3, 0, wx.EXPAND)
+
+
+
 
     def set_freq(self, target_freq):
         """
@@ -295,18 +238,25 @@ class app_top_block(stdgui2.std_top_block):
         
         if r:
             self.myform['freq'].set_value(target_freq)     # update displayed value
-            if self.show_debug_info:
-                self.myform['baseband'].set_value(r.baseband_freq)
-                self.myform['ddc'].set_value(r.dxc_freq)
-	    if not self.options.oscilloscope:
-		self.scope.set_baseband_freq(target_freq)
-    	    return True
+        if not self.options.oscilloscope:
+            self.scope.set_baseband_freq(target_freq)
+            return True
 
         return False
 
     def set_gain(self, gain):
         self.myform['gain'].set_value(gain)     # update displayed value
-        self.subdev.set_gain(gain)
+        if (gain == "High"):
+          self.subdev.set_gain(1)
+
+        if (gain == "Med"):
+          self.subdev.set_gain(2)
+
+        if (gain == "Low"):
+          self.subdev.set_gain(3)
+
+        if (gain == "Ultralow"):
+          self.subdev.set_gain(4)
 
     def set_decim(self, decim):
         ok = self.u.set_decim_rate(decim)

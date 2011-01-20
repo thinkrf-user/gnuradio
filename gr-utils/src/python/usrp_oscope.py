@@ -61,8 +61,8 @@ class app_top_block(stdgui2.std_top_block):
                           help="set fgpa decimation rate to DECIM [default=%default]")
         parser.add_option("-f", "--freq", type="eng_float", default=None,
                           help="set frequency to FREQ", metavar="FREQ")
-        parser.add_option("-g", "--gain", type="eng_float", default=None,
-                          help="set gain in dB (default is midpoint)")
+        parser.add_option("-g", "--gain", type="string", default="Ultralow",
+                          help="set gain value (High, Med, Low, Ultralow), (default is Ultralow)")
         parser.add_option("-8", "--width-8", action="store_true", default=False,
                           help="Enable 8-bit samples across USB")
         parser.add_option( "--no-hb", action="store_true", default=False,
@@ -146,23 +146,15 @@ class app_top_block(stdgui2.std_top_block):
                                             v_scale=options.v_scale,
                                             t_scale=options.t_scale,
                                             num_inputs=self.num_inputs)
-        if self.dualchan:
-          # deinterleave two channels from FPGA
-          self.di = gr.deinterleave(gr.sizeof_gr_complex) 
-          self.connect(self.u,self.di) 
-          self.connect((self.di,0),(self.scope,0))
-          self.connect((self.di,1),(self.scope,1))
-        else:
-          self.connect(self.u, self.scope)
+        self.connect(self.u, self.scope)
 
         self._build_gui(vbox)
 
         # set initial values
 
         if options.gain is None:
-            # if no gain was specified, use the mid-point in dB
-            g = self.subdev.gain_range()
-            options.gain = float(g[0]+g[1])/2
+            # if no gain was specified, use Ultralow
+            options.gain = "Ultralow"
 
         if options.freq is None:
             if ((self.subdev.dbid()==usrp_dbid.BASIC_RX) or (self.subdev.dbid()==usrp_dbid.LF_RX)):
@@ -178,18 +170,9 @@ class app_top_block(stdgui2.std_top_block):
         if self.show_debug_info:
             self.myform['decim'].set_value(self.u.decim_rate())
             self.myform['fs@usb'].set_value(self.u.adc_freq() / self.u.decim_rate())
-            self.myform['dbname'].set_value(self.subdev.name())
-            self.myform['baseband'].set_value(0)
-            self.myform['ddc'].set_value(0)
-            if self.num_inputs==2:
-              self.myform['baseband2'].set_value(0)
-              self.myform['ddc2'].set_value(0)              
                         
         if not(self.set_freq(options.freq)):
             self._set_status_msg("Failed to set initial frequency")
-        if self.num_inputs==2:
-          if not(self.set_freq2(options.freq)):
-            self._set_status_msg("Failed to set initial frequency for channel 2")          
 
 
     def _set_status_msg(self, msg):
@@ -200,84 +183,49 @@ class app_top_block(stdgui2.std_top_block):
         def _form_set_freq(kv):
             return self.set_freq(kv['freq'])
 
-        def _form_set_freq2(kv):
-            return self.set_freq2(kv['freq2'])            
+        def _form_set_decim(kv):
+            return self.set_decim(kv['decim'])
+
         vbox.Add(self.scope.win, 10, wx.EXPAND)
         
         # add control area at the bottom
         self.myform = myform = form.form()
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        hbox.Add((5,0), 0, 0)
+
+        # add our settings box
+        vbox1 = wx.BoxSizer(wx.HORIZONTAL)
         myform['freq'] = form.float_field(
-            parent=self.panel, sizer=hbox, label="Center freq", weight=1,
+            parent=self.panel, sizer=vbox1, label="Center freq", weight=1,
             callback=myform.check_input_and_call(_form_set_freq, self._set_status_msg))
-        if self.num_inputs==2:
-          myform['freq2'] = form.float_field(
-              parent=self.panel, sizer=hbox, label="Center freq2", weight=1,
-              callback=myform.check_input_and_call(_form_set_freq2, self._set_status_msg))          
-          hbox.Add((5,0), 0, 0)
-        g = self.subdev.gain_range()
-        myform['gain'] = form.slider_field(parent=self.panel, sizer=hbox, label="Gain",
-                                           weight=3,
-                                           min=int(g[0]), max=int(g[1]),
-                                           callback=self.set_gain)
-
-        hbox.Add((5,0), 0, 0)
-        vbox.Add(hbox, 0, wx.EXPAND)
-
-        self._build_subpanel(vbox)
-
-    def _build_subpanel(self, vbox_arg):
-        # build a secondary information panel (sometimes hidden)
-
-        # FIXME figure out how to have this be a subpanel that is always
-        # created, but has its visibility controlled by foo.Show(True/False)
-        
-        def _form_set_decim(kv):
-            return self.set_decim(kv['decim'])
-
-        if not(self.show_debug_info):
-            return
-
-        panel = self.panel
-        vbox = vbox_arg
-        myform = self.myform
-
-        #panel = wx.Panel(self.panel, -1)
-        #vbox = wx.BoxSizer(wx.VERTICAL)
-
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
-        hbox.Add((5,0), 0)
 
         myform['decim'] = form.int_field(
-            parent=panel, sizer=hbox, label="Decim",
+            parent=self.panel, sizer=vbox1, label="Decim",
             callback=myform.check_input_and_call(_form_set_decim, self._set_status_msg))
 
-        hbox.Add((5,0), 1)
         myform['fs@usb'] = form.static_float_field(
-            parent=panel, sizer=hbox, label="Fs@USB")
+            parent=self.panel, sizer=vbox1, label="Fs@USB")
 
-        hbox.Add((5,0), 1)
-        myform['dbname'] = form.static_text_field(
-            parent=panel, sizer=hbox)
+        hbox.Add(vbox1, 1, wx.HORIZONTAL)
 
-        hbox.Add((5,0), 1)
-        myform['baseband'] = form.static_float_field(
-            parent=panel, sizer=hbox, label="Analog BB")
+        hbox.Add((25,0), 0, 0)
 
-        hbox.Add((5,0), 1)
-        myform['ddc'] = form.static_float_field(
-            parent=panel, sizer=hbox, label="DDC")
-        if self.num_inputs==2:
-          hbox.Add((1,0), 1)
-          myform['baseband2'] = form.static_float_field(
-              parent=panel, sizer=hbox, label="BB2")
-          hbox.Add((1,0), 1)
-          myform['ddc2'] = form.static_float_field(
-            parent=panel, sizer=hbox, label="DDC2")          
+        # add our gain box
+        vbox2 = wx.BoxSizer(wx.VERTICAL)
+        myform['gain'] = form.radiobox_field(
+          parent=self.panel, 
+          sizer=vbox2, 
+          label="Gain",
+          weight=1,
+          choices=["High", "Med", "Low", "Ultralow"],
+          value="Ultralow",
+          callback=self.set_gain
+        )
+        hbox.Add(vbox2, 0, wx.EXPAND)
+        hbox.Add((25,0), 0, 0)
 
-        hbox.Add((5,0), 0)
+        # now add that big row to the main elements
         vbox.Add(hbox, 0, wx.EXPAND)
+
 
         
     def set_freq(self, target_freq):
@@ -296,39 +244,23 @@ class app_top_block(stdgui2.std_top_block):
         
         if r:
             self.myform['freq'].set_value(target_freq)     # update displayed value
-            if self.show_debug_info:
-                self.myform['baseband'].set_value(r.baseband_freq)
-                self.myform['ddc'].set_value(r.dxc_freq)
-            return True
-
-        return False
-
-    def set_freq2(self, target_freq):
-        """
-        Set the center frequency of we're interested in for the second channel.
-
-        @param target_freq: frequency in Hz
-        @rypte: bool
-
-        Tuning is a two step process.  First we ask the front-end to
-        tune as close to the desired frequency as it can.  Then we use
-        the result of that operation and our target_frequency to
-        determine the value for the digital down converter.
-        """
-        r = usrp.tune(self.u, 1, self.subdev, target_freq)
-        
-        if r:
-            self.myform['freq2'].set_value(target_freq)     # update displayed value
-            if self.show_debug_info:
-                self.myform['baseband2'].set_value(r.baseband_freq)
-                self.myform['ddc2'].set_value(r.dxc_freq)
             return True
 
         return False
 
     def set_gain(self, gain):
         self.myform['gain'].set_value(gain)     # update displayed value
-        self.subdev.set_gain(gain)
+        if (gain == "High"):
+          self.subdev.set_gain(1)
+
+        if (gain == "Med"):
+          self.subdev.set_gain(2)
+
+        if (gain == "Low"):
+          self.subdev.set_gain(3)
+
+        if (gain == "Ultralow"):
+          self.subdev.set_gain(4)
 
     def set_decim(self, decim):
         ok = self.u.set_decim_rate(decim)
