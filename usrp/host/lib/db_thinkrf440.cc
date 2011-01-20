@@ -279,7 +279,7 @@ thinkrf440_base_rx::_set_attn(float attn)
 db_thinkrf440_rx::db_thinkrf440_rx(usrp_basic_sptr usrp, int which)
   : thinkrf440_base_rx(usrp, which)
 {
-  set_gain((gain_min() + gain_max()) / 2.0);  // initialize gain
+  set_gain(4);  // initialize gain to Ultralow (4)
 }
 
 db_thinkrf440_rx::~db_thinkrf440_rx()
