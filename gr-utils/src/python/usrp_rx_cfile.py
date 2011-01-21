@@ -26,8 +26,8 @@ class my_top_block(gr.top_block):
                           help="set fgpa decimation rate to DECIM [default=%default]")
         parser.add_option("-f", "--freq", type="eng_float", default=None,
                           help="set frequency to FREQ", metavar="FREQ")
-        parser.add_option("-g", "--gain", type="eng_float", default=None,
-                          help="set gain in dB (default is midpoint)")
+        parser.add_option("-g", "--gain", type="string", default="Ultralow",
+                          help="set gain in dB (one of High, Med, Low or Ultralow, default is Ultralow)")
         parser.add_option("-8", "--width-8", action="store_true", default=False,
                           help="Enable 8-bit samples across USB")
         parser.add_option( "--no-hb", action="store_true", default=False,
@@ -90,15 +90,28 @@ class my_top_block(gr.top_block):
 
         if options.gain is None:
             # if no gain was specified, use the mid-point in dB
-            g = self.subdev.gain_range()
-            options.gain = float(g[0]+g[1])/2
+            options.gain = "Ultralow"
 
-        self.subdev.set_gain(options.gain)
+        self.set_gain(options.gain)
 
         r = self.u.tune(0, self.subdev, options.freq)
         if not r:
             sys.stderr.write('Failed to set frequency\n')
             raise SystemExit, 1
+
+
+    def set_gain(self, gain):
+       if (gain == "High"):
+           self.subdev.set_gain(1)
+       
+       if (gain == "Med"):
+           self.subdev.set_gain(2)
+       
+       if (gain == "Low"):
+           self.subdev.set_gain(3)
+       
+       if (gain == "Ultralow"):
+           self.subdev.set_gain(4)
 
 
 if __name__ == '__main__':
