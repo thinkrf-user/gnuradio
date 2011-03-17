@@ -293,5 +293,6 @@ db_thinkrf440_rx::gain_db_per_step()
 bool
 db_thinkrf440_rx::i_and_q_swapped()
 {
-  return true;
+	//return true;
+  return false;
 }
