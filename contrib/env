@@ -1,0 +1,3 @@
+export LD_LIBRARY_PATH="/opt/gnuradio-thinkrf/lib"
+export PATH="/opt/gnuradio-thinkrf/bin:$PATH"
+export PYTHONPATH="/opt/gnuradio-thinkrf/lib/python2.6/site-packages"
